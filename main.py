@@ -1,24 +1,23 @@
 from utils import *
 
-
 while True:
-    opcion = False
 
-    crearTitulo("Texto", 20, "=")
+    printSevenAndHalfTitle()
+    crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
 
-    crearMenu(["Sumar","Restar","Multiplicar","Dividir","Salir"],empezarEnCero=False)
-
-    opcion = comprobarInput("Opcion: ",soloNum=True,tuplaRangoNumeros=(1,5))
+    option = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
 
 
-    if opcion == "1":
-        suma()
-    elif opcion == "2":
-        resta()
-    elif opcion == "3":
-        multiplicacion()
-    elif opcion == "4":
-        division()
+    if option == "1":
+        playersConf()
+    elif option == "2":
+        settings()
+    elif option == "3":
+        play()
+    elif option == "4":
+        ranking()
+    elif option == "5":
+        reports()
     else:
-        print("Saliendo...")
+        print("Good Bye!!!")
         break

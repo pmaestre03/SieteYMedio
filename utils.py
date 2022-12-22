@@ -1,10 +1,10 @@
 #Recibe una lista y un bool y crea un menu en base a la lista
-def crearMenu(lista,empezarEnCero = True):
+def crearMenu(lista,separador,empezarEnCero = True):
     for i in range(len(lista)):
         if empezarEnCero:
-            print(str(i) + ". "+ str(lista[i]))
+            print(str(i) + separador+ str(lista[i]))
         else:
-            print(str(i+1) + ". " + str(lista[i]))
+            print(str(i+1) + separador + str(lista[i]))
 
 #Recibe un texto a centrar, el numero al cual quiere centrar y, opcionalmente, un caracter para rellenar los laterales
 def crearTitulo(titulo,centroNumero,centroCaracter = False):
@@ -51,14 +51,29 @@ def comprobarInput(textoInput, soloNum = False,tuplaRangoNumeros = (), letras_nu
             else:
                 input("Puedes poner lo que te salga de los huevos y aun asi fallas, que sujeto tan estupido\nPulsa enter para continuar")
 
-def suma():
-    print("suma")
+def printSevenAndHalfTitle():
+    print("="*107+"\n"+
+"  #####                                          #                         #     #                        \n"
+" #     #  ######  #    #  ######  #    #        # #    #    #  #####       #     #    ##    #       ######\n"
+" #        #       #    #  #       ##   #       #   #   ##   #  #    #      #     #   #  #   #       #     \n"
+"  #####   #####   #    #  #####   # #  #      #     #  # #  #  #    #      #######  #    #  #       ##### \n"
+"       #  #       #    #  #       #  # #      #######  #  # #  #    #      #     #  ######  #       #     \n"
+" #     #  #        #  #   #       #   ##      #     #  #   ##  #    #      #     #  #    #  #       #     \n"
+"  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
+"="*107+"\n"
+)
 
-def resta():
-    print("resta")
+def playersConf():
+    print("Players conf")
 
-def multiplicacion():
-    print("multiplicacion")
+def settings():
+    print("Settings")
 
-def division():
-    print("division")
+def play():
+    print("Play")
+
+def ranking():
+    print("Ranking")
+
+def reports():
+    print("Reports")
