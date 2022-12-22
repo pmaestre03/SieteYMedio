@@ -1,24 +1,32 @@
 from utils import *
 from random import *
 
+#Ejemplo de uso de pymysql
+'''
+import pymysql
+conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="proyecto")
+cur = conn.cursor()
+query = f"select * from aventura"
+cur.execute(query)
+variable = cur.fetchall
+'''
+
 while True:
 
     printSevenAndHalfTitle("")
     crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
 
-    option = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
+    opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
 
-
-    if option == "1":
+    if opcion == "1":
         playersConf()
-        print(newRandomDNI())
-    elif option == "2":
+    elif opcion == "2":
         settings()
-    elif option == "3":
+    elif opcion == "3":
         play()
-    elif option == "4":
+    elif opcion == "4":
         ranking()
-    elif option == "5":
+    elif opcion == "5":
         reports()
     else:
         print("Good Bye!!!")

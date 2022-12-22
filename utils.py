@@ -65,7 +65,25 @@ mensajeFinal.center(107,"=")+"\n"
 )
 
 def playersConf():
-    print("Players conf")
+    limpiarTerminal()
+    while True:
+        printSevenAndHalfTitle(" Add/Remove/Show Players ")
+        crearMenu(["New Human Player","New Boot","Show/Remove Players","Go back"],") ",empezarEnCero=False)
+
+        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+
+        if opcion == "1":
+            newHuman()
+        elif opcion == "2":
+            newBot()
+        elif opcion == "3":
+            showPlayers()
+        else:
+            limpiarTerminal()
+            break
+
+
+    
 
 def settings():
     print("Settings")
