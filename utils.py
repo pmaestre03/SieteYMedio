@@ -1,3 +1,4 @@
+from random import *
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
     for i in range(len(lista)):
@@ -51,7 +52,7 @@ def comprobarInput(textoInput, soloNum = False,tuplaRangoNumeros = (), letras_nu
             else:
                 input("Puedes poner lo que te salga de los huevos y aun asi fallas, que sujeto tan estupido\nPulsa enter para continuar")
 
-def printSevenAndHalfTitle():
+def printSevenAndHalfTitle(mensajeFinal):
     print("="*107+"\n"+
 "  #####                                          #                         #     #                        \n"
 " #     #  ######  #    #  ######  #    #        # #    #    #  #####       #     #    ##    #       ######\n"
@@ -60,7 +61,7 @@ def printSevenAndHalfTitle():
 "       #  #       #    #  #       #  # #      #######  #  # #  #    #      #     #  ######  #       #     \n"
 " #     #  #        #  #   #       #   ##      #     #  #   ##  #    #      #     #  #    #  #       #     \n"
 "  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
-"="*107+"\n"
+mensajeFinal.center(107,"=")+"\n"
 )
 
 def playersConf():
@@ -77,3 +78,10 @@ def ranking():
 
 def reports():
     print("Reports")
+
+def newRandomDNI():
+    dniNumero = randint(11111111,99999999)
+    dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+
+    #Habria que comprobar si el DNI aleatorio existe en la BBDD
+    return f"{dniNumero}{dniLetra}"

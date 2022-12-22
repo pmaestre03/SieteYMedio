@@ -1,8 +1,9 @@
 from utils import *
+from random import *
 
 while True:
 
-    printSevenAndHalfTitle()
+    printSevenAndHalfTitle("")
     crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
 
     option = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
@@ -10,6 +11,7 @@ while True:
 
     if option == "1":
         playersConf()
+        print(newRandomDNI())
     elif option == "2":
         settings()
     elif option == "3":
