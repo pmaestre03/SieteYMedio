@@ -159,7 +159,7 @@ def comprobacion_fin(dni,name,level_risc,human=True):
         new = {'name':name,'human':human,'bank':False,'initialCard':'','priority':0,'type':level_risc,'bet':0,'point':0,'cards':[],'roundPoins':0}
         tupla = dni,new
         return tuple
-    return 
+        
 def newHuman_bot(opc):
     if opc == 1:
         dni = comp_dni()
