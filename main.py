@@ -14,7 +14,7 @@ variable = cur.fetchall
 while True:
     limpiarTerminal()
     printSevenAndHalfTitle("")
-    crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
+    crearMenu(["Añadir/Eliminar/Mostrar Jugadores","Configuración","Jugar","Clasificación","Reportes","Salir"],") ",empezarEnCero=False)
 
     opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
 
@@ -29,5 +29,5 @@ while True:
     elif opcion == "5":
         reports()
     else:
-        print("Good Bye!!!")
+        print("Adiós!!!")
         break

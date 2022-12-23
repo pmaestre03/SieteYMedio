@@ -1,4 +1,9 @@
 from random import *
+import pymysql
+
+conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="proyecto")
+cur = conn.cursor()
+
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
     for i in range(len(lista)):
@@ -75,7 +80,8 @@ def newRandomDNI():
 def playersConf():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Add/Remove/Show Players ")
+        printSevenAndHalfTitle("")
+        crearTitulo("Añadir/Eliminar/Mostrar Jugadores",107)
         crearMenu(["New Human Player","New Boot","Show/Remove Players","Go back"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
@@ -85,7 +91,7 @@ def playersConf():
         elif opcion == "2":
             newBot()
         elif opcion == "3":
-            showPlayers()
+            showPlayersAndRemove()
         else:
             break
 
@@ -95,8 +101,15 @@ def newHuman():
 def newBot():
     print("NB")
 
-def showPlayers():
-    print("SP")
+def showPlayersAndRemove():
+    query = f"select * from player"
+    cur.execute(query)
+    variable = cur.fetchall()
+
+    input("Seguro? ")
+    for i in variable:
+        print(i)
+    input()
     
 #Settings functions
 def settings():
