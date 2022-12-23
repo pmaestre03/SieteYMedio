@@ -1,4 +1,20 @@
 from random import *
+import pymysql
+
+conn = pymysql.connect(host="51.145.227.94", user="pnaharro", password="P@ssw0rd", db="proyecto")
+cur = conn.cursor()
+
+query = f"select * from player"
+cur.execute(query)
+player = cur.fetchall()
+player_dnis = []
+player_names = []
+for i in player:
+        player_dnis.append(i[0])
+        player_names.append(i[1])
+
+
+
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
     for i in range(len(lista)):
@@ -89,11 +105,82 @@ def playersConf():
         else:
             break
 
-def newHuman():
-    print("NH")
+def comp_dni():
+    lista = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H',
+             'L', 'C', 'K', 'E']
+    try:
+        nif = input('introduce un dni: ')
+        if len(nif) == 9:
+            if nif[:8].isdigit() and nif[8:].isalpha():
+                if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
+                    for i in player_dnis:
+                        if nif == i:
+                            raise ValueError('el dni ya exsiste')
+                        else:
+                            return nif.upper()
+                else:
+                    raise ValueError('la letra del dni no es correcta')
+            else:
+                raise ValueError('el dni debe tener 8 numeros y una letra')
+        else:
+            raise ValueError('el dni debe tener 9 caracteres')
+    except ValueError as e:
+        print(e)
+        comp_dni()
 
-def newBot():
-    print("NB")
+def comp_name():
+    try:
+        name = input('introduce un name: ')
+        for i in player_names:
+            if name == i:
+                raise ValueError('el nombre ya exsiste')
+            else:
+                return name
+                
+    except ValueError as e:
+        print(e)
+        comp_dni()
+def level_risc():
+    cadena = 'escoge un nivel de riesgo\n1) atrevido \n2) normal\n3) prudente\n'
+    print(cadena)
+    opc =   comprobarInput(textoInput='opcion?',soloNum=True,tuplaRangoNumeros=(1,3))
+    if opc == 1:
+        return 50
+    if opc == 2:
+        return 40
+    if opc == 3:
+        return 30
+def comprobacion_fin(dni,name,level_risc,human=True):
+    cadena = 'dni'.ljust(10)+''+str(dni).rjust(30)+'\n'+ 'name'.ljust(10)+''+str(name).rjust(30)+'\n'+ 'level_risc'.ljust(10)+''+str(level_risc).rjust(30)+'\n'
+    new = []
+    print (cadena)
+    opc = input('es correcto?')
+    if opc.lower == 's':
+        new = {'name':name,'human':human,'bank':False,'initialCard':'','priority':0,'type':level_risc,'bet':0,'point':0,'cards':[],'roundPoins':0}
+        tupla = dni,new
+        return tuple
+    return 
+def newHuman_bot(opc):
+    if opc == 1:
+        dni = comp_dni()
+        limpiarTerminal()
+        name = comp_name()
+        limpiarTerminal()
+        level_risc= level_risc()
+        limpiarTerminal()
+        new = comprobacion_fin(dni,name,level_risc)
+    if opc == 2:
+        dni = newRandomDNI()
+        limpiarTerminal()
+        name = comp_name()
+        limpiarTerminal()
+        level_risc= level_risc()
+        limpiarTerminal()
+        new = comprobacion_fin(dni,name,level_risc,human=False)
+    return new
+
+   
+
 
 def showPlayers():
     print("SP")
