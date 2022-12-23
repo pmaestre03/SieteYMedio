@@ -12,7 +12,7 @@ variable = cur.fetchall
 '''
 
 while True:
-
+    limpiarTerminal()
     printSevenAndHalfTitle("")
     crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
 
