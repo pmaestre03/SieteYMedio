@@ -16,7 +16,7 @@ while True:
     printSevenAndHalfTitle("")
     crearMenu(["Añadir/Eliminar/Mostrar Jugadores","Configuración","Jugar","Clasificación","Reportes","Salir"],") ",empezarEnCero=False)
 
-    opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
+    opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
 
     if opcion == "1":
         playersConf()

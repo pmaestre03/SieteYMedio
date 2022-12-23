@@ -1,8 +1,19 @@
 from random import *
 import pymysql
 
-conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="proyecto")
+conn = pymysql.connect(host="51.145.227.94", user="pnaharro", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
+
+query = f"select * from player"
+cur.execute(query)
+player = cur.fetchall()
+player_dnis = []
+player_names = []
+for i in player:
+        player_dnis.append(i[0])
+        player_names.append(i[1])
+
+
 
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
@@ -24,12 +35,12 @@ def limpiarTerminal():
     print("\n" * 100)
 
 #Nos permite controlar todos los parametros permitidos en un input (excepto textos con caracteres entre medio)
-def comprobarInput(textoInput, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False):
+def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False):
     while True:
         opcion = input(textoInput)
         if opcion.isspace() or opcion == "":
             input("Introduce algo\nPulsa enter para continuar")
-        elif not soloNum:
+        elif soloText:
             if opcion.isalpha():
                 return opcion
             else:
@@ -70,11 +81,34 @@ mensajeFinal.center(107,"=")+"\n"
 )
 
 def newRandomDNI():
-    dniNumero = randint(11111111,99999999)
-    dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+    while True:
+        dniNumero = randint(11111111,99999999)
+        dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+        dni = f"{dniNumero}{dniLetra}"
 
-    #Habria que comprobar si el DNI aleatorio existe en la BBDD
-    return f"{dniNumero}{dniLetra}"
+        if checkExistenceDNI(dni):
+            return dni
+            
+        
+
+def checkExistenceDNI(dni):
+    query = f"select * from player where dni = '{dni}'"
+    cur.execute(query)
+    
+    if not cur.fetchall():
+        return True
+    else:
+        return False
+
+def checkExistenceName(name):
+    query = f"select * from player where name = '{name}'"
+    cur.execute(query)
+    
+    if not cur.fetchall():
+        return True
+    else:
+        return False
+    
 
 #Players conf functions
 def playersConf():
@@ -84,22 +118,99 @@ def playersConf():
         crearTitulo("Añadir/Eliminar/Mostrar Jugadores",107)
         crearMenu(["New Human Player","New Boot","Show/Remove Players","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
-            newHuman()
+            newPlayer()
         elif opcion == "2":
-            newBot()
+            newPlayer(esBot=True)
         elif opcion == "3":
             showPlayersAndRemove()
         else:
             break
 
-def newHuman():
-    print("NH")
+def newPlayer(esBot=False):
 
-def newBot():
-    print("NB")
+    limpiarTerminal()
+    printSevenAndHalfTitle("")
+
+    titulo = "Nuevo Jugador Humano"
+    if esBot:
+        titulo = "Nuevo Jugador Bot"
+
+    crearTitulo(titulo,107)
+
+    if esBot:
+        dni = newRandomDNI()
+    else:
+        dni = comp_dni()
+        print(dni)
+    
+    while True:
+
+        name = comprobarInput("Introduce el nombre: ",soloText=False,letras_num=True)
+
+        if not checkExistenceName(name):
+            print("Este nombre ya existe")
+        else:
+            break
+
+    riesgo = selectLevelRisc()
+
+    if not comprobacion_fin(dni,name,riesgo):
+        checkHuman = 1
+        if esBot:
+            checkHuman = 0
+        input(f"{dni}\n{name}\n{riesgo}\n{checkHuman}")
+        query = f"INSERT INTO player (dni, name, level_risc,human) VALUES ('{dni}','{name}',{riesgo},{checkHuman})"
+        cur.execute(query)
+        input("Jugador creado correctamente\nPulsa enter para continuar")
+    else:
+        print("Volviendo")
+
+def comp_dni():
+    lista = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H',
+             'L', 'C', 'K', 'E']
+    try:
+        nif = input('Introduce tu dni: ')
+        if len(nif) == 9:
+            if nif[:8].isdigit() and nif[8:].isalpha():
+                if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
+                    
+                    if not checkExistenceDNI(nif):
+                        raise ValueError('Este DNI ya existe')
+                    else:
+                        return nif.upper()
+                else:
+                    raise ValueError('La letra del DNI no es correcta')
+            else:
+                raise ValueError('El DNI debe tener 8 numeros y una letra')
+        else:
+            raise ValueError('EL DNI debe tener 9 caracteres')
+    except ValueError as e:
+        print(e)
+        comp_dni()
+
+def selectLevelRisc():
+    cadena = 'Escoge un nivel de riesgo\n1) Atrevido \n2) Normal\n3) Prudente\n'
+    print(cadena)
+    opc = comprobarInput(textoInput='> ',soloText=False,soloNum=True,tuplaRangoNumeros=(1,3))
+    if opc == "1":
+        return 50
+    if opc == "2":
+        return 40
+    if opc == "3":
+        return 30
+
+def comprobacion_fin(dni,name,level_risc):
+    cadena = 'DNI'.ljust(10)+''+str(dni).rjust(30)+'\n'+ 'Nombre'.ljust(10)+''+str(name).rjust(30)+'\n'+ 'Nivel de Riesgo'.ljust(10)+''+str(level_risc).rjust(25)+'\n'
+    print (cadena)
+    opc = input('Es correcto? S/n\n> ')
+    if opc.lower == 's':
+        return True
+    else:
+        return False
+
 
 def showPlayersAndRemove():
     query = f"select * from player"
@@ -118,7 +229,7 @@ def settings():
         printSevenAndHalfTitle(" Settings ")
         crearMenu(["Set Game Players","Set Card's Deck","Set Max Rounds (Default 5 Rounds)","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
             setGamePlayers()
@@ -149,7 +260,7 @@ def ranking():
         printSevenAndHalfTitle(" Ranking ")
         crearMenu(["Players With More Earnings","Players With More Games Played","Players With More Minutes Played","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
             showPlayersWithMoreEarning()
@@ -176,7 +287,7 @@ def reports():
         printSevenAndHalfTitle(" Ranking ")
         crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,8))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
 
         if opcion == "1":
             print("nada")
@@ -284,5 +395,3 @@ cartasP = {
     "QH": {"literal": "Reina de Tréboles", "value": 12, "priority": 1, "realValue": 0.5},
     "KH": {"literal": "Rey de Tréboles", "value": 13, "priority": 1, "realValue": 0.5},
 }
-
-
