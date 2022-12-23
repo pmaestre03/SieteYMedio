@@ -64,6 +64,14 @@ def printSevenAndHalfTitle(mensajeFinal):
 mensajeFinal.center(107,"=")+"\n"
 )
 
+def newRandomDNI():
+    dniNumero = randint(11111111,99999999)
+    dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+
+    #Habria que comprobar si el DNI aleatorio existe en la BBDD
+    return f"{dniNumero}{dniLetra}"
+
+#Players conf functions
 def playersConf():
     limpiarTerminal()
     while True:
@@ -79,30 +87,88 @@ def playersConf():
         elif opcion == "3":
             showPlayers()
         else:
-            limpiarTerminal()
             break
 
+def newHuman():
+    print("NH")
 
+def newBot():
+    print("NB")
+
+def showPlayers():
+    print("SP")
     
-
+#Settings functions
 def settings():
-    print("Settings")
+    limpiarTerminal()
+    while True:
+        printSevenAndHalfTitle(" Settings ")
+        crearMenu(["Set Game Players","Set Card's Deck","Set Max Rounds (Default 5 Rounds)","Go back"],") ",empezarEnCero=False)
 
+        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+
+        if opcion == "1":
+            setGamePlayers()
+        elif opcion == "2":
+            setCardsDeck()
+        elif opcion == "3":
+            setMaxRounds()
+        else:
+            break
+
+def setGamePlayers():
+    print("SGP")
+
+def setCardsDeck():
+    print("SCD")
+
+def setMaxRounds():
+    print("SMR")
+
+#Play Functions
 def play():
     print("Play")
 
+#Ranking functions
 def ranking():
-    print("Ranking")
+    limpiarTerminal()
+    while True:
+        printSevenAndHalfTitle(" Ranking ")
+        crearMenu(["Players With More Earnings","Players With More Games Played","Players With More Minutes Played","Go back"],") ",empezarEnCero=False)
 
+        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+
+        if opcion == "1":
+            showPlayersWithMoreEarning()
+        elif opcion == "2":
+            showPlayersWithMoreGamesPlayed()
+        elif opcion == "3":
+            showPlayersWithMoreMinutesPlayed()
+        else:
+            break
+
+def showPlayersWithMoreEarning():
+    print("PWME")
+
+def showPlayersWithMoreGamesPlayed():
+    print("PWMGP")
+
+def showPlayersWithMoreMinutesPlayed():
+    print("PWMMP")
+
+#Reports Functions
 def reports():
-    print("Reports")
+    limpiarTerminal()
+    while True:
+        printSevenAndHalfTitle(" Ranking ")
+        crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
 
-def newRandomDNI():
-    dniNumero = randint(11111111,99999999)
-    dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,8))
 
-    #Habria que comprobar si el DNI aleatorio existe en la BBDD
-    return f"{dniNumero}{dniLetra}"
+        if opcion == "1":
+            print("nada")
+        elif opcion == "8":
+            break
 
 
 ###############################################################################################################
