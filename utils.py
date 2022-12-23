@@ -97,9 +97,9 @@ def playersConf():
         opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
-            newHuman()
+            newHuman_bot(opc=opcion)
         elif opcion == "2":
-            newBot()
+            newHuman_bot(opc=opcion)
         elif opcion == "3":
             showPlayers()
         else:
@@ -159,7 +159,7 @@ def comprobacion_fin(dni,name,level_risc,human=True):
         new = {'name':name,'human':human,'bank':False,'initialCard':'','priority':0,'type':level_risc,'bet':0,'point':0,'cards':[],'roundPoins':0}
         tupla = dni,new
         return tuple
-        
+
 def newHuman_bot(opc):
     if opc == 1:
         dni = comp_dni()
