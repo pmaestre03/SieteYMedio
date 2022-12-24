@@ -4,15 +4,6 @@ import pymysql
 conn = pymysql.connect(host="51.145.227.94", user="pnaharro", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
 
-query = f"select * from player"
-cur.execute(query)
-player = cur.fetchall()
-player_dnis = []
-player_names = []
-for i in player:
-        player_dnis.append(i[0])
-        player_names.append(i[1])
-
 
 
 #Recibe una lista y un bool y crea un menu en base a la lista
@@ -112,11 +103,11 @@ def checkExistenceName(name):
 
 #Players conf functions
 def playersConf():
-    limpiarTerminal()
     while True:
+        limpiarTerminal()
         printSevenAndHalfTitle("")
         crearTitulo("Añadir/Eliminar/Mostrar Jugadores",107)
-        crearMenu(["New Human Player","New Boot","Show/Remove Players","Go back"],") ",empezarEnCero=False)
+        crearMenu(["Nuevo jugador","Nuevo Bot","Mostrar/Quitar jugadores","Atras"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
@@ -144,7 +135,6 @@ def newPlayer(esBot=False):
         dni = newRandomDNI()
     else:
         dni = comp_dni()
-        print(dni)
     
     while True:
 
@@ -157,30 +147,29 @@ def newPlayer(esBot=False):
 
     riesgo = selectLevelRisc()
 
-    if not comprobacion_fin(dni,name,riesgo):
+    if comprobacion_fin(dni,name,riesgo):
         checkHuman = 1
         if esBot:
             checkHuman = 0
-        input(f"{dni}\n{name}\n{riesgo}\n{checkHuman}")
-        query = f"INSERT INTO player (dni, name, level_risc,human) VALUES ('{dni}','{name}',{riesgo},{checkHuman})"
+        query = f"INSERT INTO player VALUES ('{dni}','{name}',{riesgo},{checkHuman})"
         cur.execute(query)
+        conn.commit()
         input("Jugador creado correctamente\nPulsa enter para continuar")
-    else:
-        print("Volviendo")
+
+
 
 def comp_dni():
-    lista = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H',
-             'L', 'C', 'K', 'E']
+    lista = ['T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E']
     try:
         nif = input('Introduce tu dni: ')
         if len(nif) == 9:
             if nif[:8].isdigit() and nif[8:].isalpha():
                 if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
-                    
                     if not checkExistenceDNI(nif):
                         raise ValueError('Este DNI ya existe')
                     else:
-                        return nif.upper()
+                        print(nif)
+                        return str(nif)
                 else:
                     raise ValueError('La letra del DNI no es correcta')
             else:
@@ -189,7 +178,7 @@ def comp_dni():
             raise ValueError('EL DNI debe tener 9 caracteres')
     except ValueError as e:
         print(e)
-        comp_dni()
+        return comp_dni()
 
 def selectLevelRisc():
     cadena = 'Escoge un nivel de riesgo\n1) Atrevido \n2) Normal\n3) Prudente\n'
@@ -203,16 +192,25 @@ def selectLevelRisc():
         return 30
 
 def comprobacion_fin(dni,name,level_risc):
-    cadena = 'DNI'.ljust(10)+''+str(dni).rjust(30)+'\n'+ 'Nombre'.ljust(10)+''+str(name).rjust(30)+'\n'+ 'Nivel de Riesgo'.ljust(10)+''+str(level_risc).rjust(25)+'\n'
-    print (cadena)
+    if level_risc == 30:
+        level_risc = "Prudente"
+    elif level_risc == 40:
+        level_risc = "Normal"
+    else:
+        level_risc = "Atrevido"
+    cadena = 'DNI'.ljust(10)+''+str(dni).rjust(30)+'\n'+ 'Nombre'.ljust(10)+''+str(name).rjust(30)+'\n'+ 'Nivel de Riesgo'.ljust(10)+''+level_risc.rjust(25)+'\n'
+    print(cadena)
     opc = input('Es correcto? S/n\n> ')
-    if opc.lower == 's':
+    if opc.lower() == 's':
         return True
     else:
         return False
 
-
 def showPlayersAndRemove():
+
+    limpiarTerminal()
+    printSevenAndHalfTitle("")
+
     query = f"select * from player"
     cur.execute(query)
     variable = cur.fetchall()

@@ -6,9 +6,10 @@ from random import *
 import pymysql
 conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="proyecto")
 cur = conn.cursor()
+
 query = f"select * from aventura"
 cur.execute(query)
-variable = cur.fetchall
+variable = cur.fetchall()
 '''
 
 while True:
