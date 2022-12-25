@@ -1,7 +1,7 @@
 from random import *
 import pymysql
 
-conn = pymysql.connect(host="51.145.227.94", user="pnaharro", password="P@ssw0rd", db="proyecto")
+conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
 
 
@@ -71,6 +71,48 @@ def printSevenAndHalfTitle(mensajeFinal):
 mensajeFinal.center(107,"=")+"\n"
 )
 
+def mostrarPlayers():
+    cursorHumanos = conn.cursor()
+    cursorBots = conn.cursor()
+
+    cadena = 'Select Players'.center(140,'*')+'\n'+'Boot Player'.center(69,' ')+'||'+'Player Player'.center(69,' ')+'\n'+'-'*140+'\n'+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(24)+"||".ljust(1)+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(25)+"\n"+"*"*140
+    print(cadena)
+
+    queryHumanos = f"select * from player where human = 1"
+    queryBot = f"select * from player where human = 0"
+
+    cursorHumanos.execute(queryHumanos)
+    cursorBots.execute(queryBot)
+
+    while True:
+        h = cursorHumanos.fetchone()
+        b = cursorBots.fetchone()
+
+        if type(h) == type(None) and type(b) == type(None):
+            break
+        if type(h) == type(None):
+            bList = list(b)
+            cadena = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1)
+        elif type(b) == type(None):
+            hList = list(h)
+            cadena = "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+        else:
+            hList = list(h)
+            bList = list(b)
+            cadena = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+        print(cadena)
+    print("*"*140)
+
+def reisgoEnTexto(riesgo):
+                if riesgo == 30:
+                    return "Prudente"
+                elif riesgo == 40:
+                    return "Normal"
+                elif riesgo == 50:
+                    return "Atrevido"
+                else:
+                    return str(riesgo)
+
 def newRandomDNI():
     while True:
         dniNumero = randint(11111111,99999999)
@@ -79,8 +121,6 @@ def newRandomDNI():
 
         if checkExistenceDNI(dni):
             return dni
-            
-        
 
 def checkExistenceDNI(dni):
     query = f"select * from player where dni = '{dni}'"
@@ -168,7 +208,6 @@ def comp_dni():
                     if not checkExistenceDNI(nif):
                         raise ValueError('Este DNI ya existe')
                     else:
-                        print(nif)
                         return str(nif)
                 else:
                     raise ValueError('La letra del DNI no es correcta')
@@ -208,17 +247,8 @@ def comprobacion_fin(dni,name,level_risc):
 
 def showPlayersAndRemove():
 
-    limpiarTerminal()
-    printSevenAndHalfTitle("")
-
-    query = f"select * from player"
-    cur.execute(query)
-    variable = cur.fetchall()
-
-    input("Seguro? ")
-    for i in variable:
-        print(i)
-    input()
+    mostrarPlayers()
+    input(":V")
     
 #Settings functions
 def settings():
