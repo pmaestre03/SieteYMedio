@@ -267,8 +267,8 @@ def showPlayersAndRemove():
 def settings():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Settings ")
-        crearMenu(["Set Game Players","Set Card's Deck","Set Max Rounds (Default 5 Rounds)","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(" Configuración ")
+        crearMenu(["Seleccionar Jugadores","Seleccionar Mazo de Cartas","Seleccionar Maximo Rondas (5 Rondas por Defecto)","Atras"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
@@ -298,8 +298,8 @@ def play():
 def ranking():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Ranking ")
-        crearMenu(["Players With More Earnings","Players With More Games Played","Players With More Minutes Played","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(" Clasificación ")
+        crearMenu(["Jugadores con más Puntos","Jugadores con más Partidas Jugadas","Jugadores con más Minutos Jugados","Atras"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
@@ -325,7 +325,7 @@ def showPlayersWithMoreMinutesPlayed():
 def reports():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Ranking ")
+        printSevenAndHalfTitle(" Reportes ")
         crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
