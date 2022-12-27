@@ -6,17 +6,18 @@ from random import *
 import pymysql
 conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="proyecto")
 cur = conn.cursor()
+
 query = f"select * from aventura"
 cur.execute(query)
-variable = cur.fetchall
+variable = cur.fetchall()
 '''
 
 while True:
     limpiarTerminal()
     printSevenAndHalfTitle("")
-    crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
+    crearMenu(["Añadir/Eliminar/Mostrar Jugadores","Configuración","Jugar","Clasificación","Reportes","Salir"],") ",empezarEnCero=False)
 
-    opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
+    opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
 
     if opcion == "1":
         playersConf()
@@ -29,5 +30,5 @@ while True:
     elif opcion == "5":
         reports()
     else:
-        print("Good Bye!!!")
+        print("Adiós!!!")
         break

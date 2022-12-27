@@ -1,4 +1,11 @@
 from random import *
+import pymysql
+
+conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
+cur = conn.cursor()
+
+
+
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
     for i in range(len(lista)):
@@ -19,12 +26,12 @@ def limpiarTerminal():
     print("\n" * 100)
 
 #Nos permite controlar todos los parametros permitidos en un input (excepto textos con caracteres entre medio)
-def comprobarInput(textoInput, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False):
+def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False):
     while True:
         opcion = input(textoInput)
         if opcion.isspace() or opcion == "":
             input("Introduce algo\nPulsa enter para continuar")
-        elif not soloNum:
+        elif soloText:
             if opcion.isalpha():
                 return opcion
             else:
@@ -64,48 +71,205 @@ def printSevenAndHalfTitle(mensajeFinal):
 mensajeFinal.center(107,"=")+"\n"
 )
 
-def newRandomDNI():
-    dniNumero = randint(11111111,99999999)
-    dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+def mostrarPlayers():
+    cursorHumanos = conn.cursor()
+    cursorBots = conn.cursor()
 
-    #Habria que comprobar si el DNI aleatorio existe en la BBDD
-    return f"{dniNumero}{dniLetra}"
+    cadena = 'Select Players'.center(140,'*')+'\n'+'Boot Player'.center(69,' ')+'||'+'Player Player'.center(69,' ')+'\n'+'-'*140+'\n'+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(24)+"||".ljust(1)+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(25)+"\n"+"*"*140
+    print(cadena)
+
+    queryHumanos = f"select * from player where human = 1"
+    queryBot = f"select * from player where human = 0"
+
+    cursorHumanos.execute(queryHumanos)
+    cursorBots.execute(queryBot)
+
+    while True:
+        h = cursorHumanos.fetchone()
+        b = cursorBots.fetchone()
+
+        if type(h) == type(None) and type(b) == type(None):
+            break
+        if type(h) == type(None):
+            bList = list(b)
+            cadena = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1)
+        elif type(b) == type(None):
+            hList = list(h)
+            cadena = "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+        else:
+            hList = list(h)
+            bList = list(b)
+            cadena = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+        print(cadena)
+    print("*"*140)
+
+def reisgoEnTexto(riesgo):
+                if riesgo == 30:
+                    return "Prudente"
+                elif riesgo == 40:
+                    return "Normal"
+                elif riesgo == 50:
+                    return "Atrevido"
+                else:
+                    return str(riesgo)
+
+def newRandomDNI():
+    while True:
+        dniNumero = randint(11111111,99999999)
+        dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
+        dni = f"{dniNumero}{dniLetra}"
+
+        if checkExistenceDNI(dni):
+            return dni
+
+def checkExistenceDNI(dni):
+    query = f"select * from player where dni = '{dni}'"
+    cur.execute(query)
+    
+    if not cur.fetchall():
+        return True
+    else:
+        return False
+
+def checkExistenceName(name):
+    query = f"select * from player where name = '{name}'"
+    cur.execute(query)
+    
+    if not cur.fetchall():
+        return True
+    else:
+        return False
+    
 
 #Players conf functions
 def playersConf():
-    limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Add/Remove/Show Players ")
-        crearMenu(["New Human Player","New Boot","Show/Remove Players","Go back"],") ",empezarEnCero=False)
+        limpiarTerminal()
+        printSevenAndHalfTitle("")
+        crearTitulo("Añadir/Eliminar/Mostrar Jugadores",107)
+        crearMenu(["Nuevo jugador","Nuevo Bot","Mostrar/Quitar jugadores","Atras"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
-            newHuman()
+            newPlayer()
         elif opcion == "2":
-            newBot()
+            newPlayer(esBot=True)
         elif opcion == "3":
-            showPlayers()
+            showPlayersAndRemove()
         else:
             break
 
-def newHuman():
-    print("NH")
+def newPlayer(esBot=False):
 
-def newBot():
-    print("NB")
+    limpiarTerminal()
+    printSevenAndHalfTitle("")
 
-def showPlayers():
-    print("SP")
+    titulo = "Nuevo Jugador Humano"
+    if esBot:
+        titulo = "Nuevo Jugador Bot"
+
+    crearTitulo(titulo,107)
+
+    if esBot:
+        dni = newRandomDNI()
+    else:
+        dni = comp_dni("Introduce tu dni: ")
+    
+    while True:
+
+        name = comprobarInput("Introduce el nombre: ",soloText=False,letras_num=True)
+
+        if not checkExistenceName(name):
+            print("Este nombre ya existe")
+        else:
+            break
+
+    riesgo = selectLevelRisc()
+
+    if comprobacion_fin(dni,name,riesgo):
+        checkHuman = 1
+        if esBot:
+            checkHuman = 0
+        query = f"INSERT INTO player VALUES ('{dni}','{name}',{riesgo},{checkHuman})"
+        cur.execute(query)
+        conn.commit()
+        input("Jugador creado correctamente\nPulsa enter para continuar")
+
+
+
+def comp_dni(textoInput):
+    lista = ['T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E']
+    try:
+        nif = input(textoInput)
+        if len(nif) == 9:
+            if nif[:8].isdigit() and nif[8:].isalpha():
+                if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
+                    if not checkExistenceDNI(nif):
+                        raise ValueError('Este DNI ya existe')
+                    else:
+                        return str(nif)
+                else:
+                    raise ValueError('La letra del DNI no es correcta')
+            else:
+                raise ValueError('El DNI debe tener 8 numeros y una letra')
+        else:
+            raise ValueError('EL DNI debe tener 9 caracteres')
+    except ValueError as e:
+        print(e)
+        return comp_dni("Introduce tu dni: ")
+
+def selectLevelRisc():
+    cadena = 'Escoge un nivel de riesgo\n1) Atrevido \n2) Normal\n3) Prudente\n'
+    print(cadena)
+    opc = comprobarInput(textoInput='> ',soloText=False,soloNum=True,tuplaRangoNumeros=(1,3))
+    if opc == "1":
+        return 50
+    if opc == "2":
+        return 40
+    if opc == "3":
+        return 30
+
+def comprobacion_fin(dni,name,level_risc):
+    if level_risc == 30:
+        level_risc = "Prudente"
+    elif level_risc == 40:
+        level_risc = "Normal"
+    else:
+        level_risc = "Atrevido"
+    cadena = 'DNI'.ljust(10)+''+str(dni).rjust(30)+'\n'+ 'Nombre'.ljust(10)+''+str(name).rjust(30)+'\n'+ 'Nivel de Riesgo'.ljust(10)+''+level_risc.rjust(25)+'\n'
+    print(cadena)
+    opc = input('Es correcto? S/n\n> ')
+    if opc.lower() == 's':
+        return True
+    else:
+        return False
+
+def showPlayersAndRemove():
+    while True:
+        limpiarTerminal()
+        mostrarPlayers()
+        print("-ID para eliminar jugador | 0 para volver atras".center(140))
+        entrada = input(" "*46+"> ")
+        
+        if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
+            query = f"delete from player where dni = '{entrada[1:]}'"
+            cur.execute(query)
+            conn.commit()
+        elif entrada == "0":
+            break
+        else:
+            input("Pon un ID valido y en formato correcto\nPulsa enter para continuar")
+
     
 #Settings functions
 def settings():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Settings ")
-        crearMenu(["Set Game Players","Set Card's Deck","Set Max Rounds (Default 5 Rounds)","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(" Configuración ")
+        crearMenu(["Seleccionar Jugadores","Seleccionar Baraja de Cartas","Seleccionar Maximo Rondas (5 Rondas por Defecto)","Atras"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
             setGamePlayers()
@@ -116,15 +280,118 @@ def settings():
         else:
             break
 
+def mostrarPlayers_settings(players_in_game_list=[]):
+    cursorHumanos = conn.cursor()
+    cursorBots = conn.cursor()
+
+    cadena = 'Select Players'.center(140,'*')+'\n'+'Boot Player'.center(69,' ')+'||'+'Player Player'.center(69,' ')+'\n'+'-'*140+'\n'+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(24)+"||".ljust(1)+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(25)+"\n"+"*"*140
+    print(cadena)
+
+    queryHumanos = f"select * from player where human = 1"
+    queryBot = f"select * from player where human = 0"
+
+    cursorHumanos.execute(queryHumanos)
+    cursorBots.execute(queryBot)
+
+    while True:
+        cadena1 = ''
+        h = cursorHumanos.fetchone()
+        b = cursorBots.fetchone()
+        if type(h) == type(None) and type(b) == type(None):
+            break
+        if type(h) == type(None):
+            bList = list(b)
+            if not bList[0] in player_in_game:
+                cadena1 = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1)
+            else:
+                cadena1 += ' '*69+"||".ljust(1)
+        elif type(b) == type(None):
+            hList = list(h)
+            if not hList[0]in player_in_game:
+                cadena1 = "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+        else:
+            hList = list(h)
+            bList = list(b)
+            if not bList[0] in players_in_game_list:
+                cadena1 += bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1)
+            else:
+                cadena1 += ' '*69+"||".ljust(1)
+            if not hList[0] in players_in_game_list:
+                cadena1+=hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+        print(cadena1)
+    print("*"*140)
+
 def setGamePlayers():
-    print("SGP")
+    limpiarTerminal()
+
+    players_in_game=[]
+    printSevenAndHalfTitle("")
+    crearTitulo("Selecciona el Numero de Jugadores\n",140)
+    player_in_game()
+    input("Pulsa enter para contnuar\n")
+    while True:
+        players = int(comprobarInput("Numero de jugadores: ",soloText=False,soloNum=True))
+        option= comprobarInput("Seguro que quieres que sean {} jugadores? S/n\n> ".format(players),soloText=True)
+        if option.lower() == 's':
+            break
+        if option.lower() != 'n':
+            print('Opcion no valida')
+    printSevenAndHalfTitle(' Selecciona un Jugador o Bot para Agregar a la Partida ')
+    for i in range(players):
+        mostrarPlayers_settings(players_in_game_list=players_in_game)
+        while True:
+            option = comprobarInput("Introduce el ID: ",soloText=False,letras_num=True)
+            if not checkExistenceDNI(option):
+                break
+            else:
+                input("Ese ID no es valido\nPulsa enter para continuar")
+        players_in_game.append(option)
+        player_in_game(players_in_game=players_in_game)
+    return players_in_game
+ 
+
+def player_in_game(players_in_game=[]):
+    query = f"select * from player"
+    cur.execute(query)
+    players = cur.fetchall()
+    pjs= []
+    for i in players:
+        pjs.append(i)
+    cadena = ' Jugadores Actuales en la Partida '.center(70,'*').center(140,' ')
+    print(cadena)
+    if len(players_in_game) == 0:
+        print('No hay Jugadores'.center(140,' '))
+    else:
+        for i in players_in_game:
+            for j in pjs:
+                if j[0] == i:
+                    if j[3] == 1:
+                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'humano'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
+                    if j[3] == 0:
+                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'boot'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
+                    print(cadena)  
 
 def setCardsDeck():
-    print("SCD")
-
+    while True:
+        printSevenAndHalfTitle(' Selecciona la Baraja ')
+        crearMenu(["Baraja Española","Baraja de Poker","Atras"],") ",empezarEnCero=False)
+        opcion = int(comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,3)))
+        if opcion == 1:
+            Cards_Deck = 'spain'
+            return Cards_Deck
+        if opcion == 2:
+            Cards_Deck = 'poker'
+            return Cards_Deck
+        else:
+            break
+    
 def setMaxRounds():
-    print("SMR")
-
+    printSevenAndHalfTitle('')
+    while True:
+        rounds = int(comprobarInput("Selecciona el Maximo de Rondas a Jugar\n> ",soloText = False,soloNum=True,))
+        option = comprobarInput("Seguro que quieres que sean {} rondas? S/n\n> ".format(rounds),letras_num=True)
+        if option.lower() == 's':
+            return rounds
 #Play Functions
 def play():
     print("Play")
@@ -133,10 +400,10 @@ def play():
 def ranking():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Ranking ")
-        crearMenu(["Players With More Earnings","Players With More Games Played","Players With More Minutes Played","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(" Clasificación ")
+        crearMenu(["Jugadores con más Puntos","Jugadores con más Partidas Jugadas","Jugadores con más Minutos Jugados","Atras"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
             showPlayersWithMoreEarning()
@@ -160,10 +427,10 @@ def showPlayersWithMoreMinutesPlayed():
 def reports():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Ranking ")
+        printSevenAndHalfTitle(" Reportes ")
         crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,8))
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
 
         if opcion == "1":
             print("nada")
@@ -271,5 +538,3 @@ cartasP = {
     "QH": {"literal": "Reina de Tréboles", "value": 12, "priority": 1, "realValue": 0.5},
     "KH": {"literal": "Rey de Tréboles", "value": 13, "priority": 1, "realValue": 0.5},
 }
-
-
