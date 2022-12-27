@@ -103,6 +103,7 @@ def mostrarPlayers():
         print(cadena)
     print("*"*140)
 
+
 def reisgoEnTexto(riesgo):
                 if riesgo == 30:
                     return "Prudente"
