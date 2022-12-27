@@ -3,17 +3,13 @@ import pymysql
 
 conn = pymysql.connect(host="51.145.227.94", user="pnaharro", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
-
 query = f"select * from player"
 cur.execute(query)
-player = cur.fetchall()
+players = cur.fetchall()
 player_dnis = []
-player_names = []
-for i in player:
-        player_dnis.append(i[0])
-        player_names.append(i[1])
-
-
+for i in players:
+    player_dnis.append(i[0])
+    
 
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
@@ -89,6 +85,15 @@ def newRandomDNI():
 
 #Players conf functions
 def playersConf():
+    query = f"select * from player"
+    cur.execute(query)
+    player = cur.fetchall()
+    player_dnis = []
+    player_names = []
+    for i in player:
+        player_dnis.append(i[0])
+        player_names.append(i[1])
+
     limpiarTerminal()
     while True:
         printSevenAndHalfTitle(" Add/Remove/Show Players ")
@@ -106,6 +111,7 @@ def playersConf():
             break
 
 def comp_dni():
+    
     lista = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H',
              'L', 'C', 'K', 'E']
     try:
@@ -128,6 +134,7 @@ def comp_dni():
         print(e)
         comp_dni()
 
+print(comp_dni())
 def comp_name():
     try:
         name = input('introduce un name: ')
@@ -140,6 +147,7 @@ def comp_name():
     except ValueError as e:
         print(e)
         comp_dni()
+
 def level_risc():
     cadena = 'escoge un nivel de riesgo\n1) atrevido \n2) normal\n3) prudente\n'
     print(cadena)
@@ -150,6 +158,7 @@ def level_risc():
         return 40
     if opc == 3:
         return 30
+
 def comprobacion_fin(dni,name,level_risc,human=True):
     cadena = 'dni'.ljust(10)+''+str(dni).rjust(30)+'\n'+ 'name'.ljust(10)+''+str(name).rjust(30)+'\n'+ 'level_risc'.ljust(10)+''+str(level_risc).rjust(30)+'\n'
     new = []
@@ -179,13 +188,14 @@ def newHuman_bot(opc):
         new = comprobacion_fin(dni,name,level_risc,human=False)
     return new
 
-   
-
-
 def showPlayers():
     print("SP")
     
 #Settings functions
+#contextGame[id_game]={'players':0,'cards_deck':'','maxRouds':0}
+query = f"select * from games"
+cur.execute(query)
+
 def settings():
     limpiarTerminal()
     while True:
@@ -203,14 +213,64 @@ def settings():
         else:
             break
 
+query = f"select * from player"
+cur.execute(query)
+players = cur.fetchall()
+
+def select_player(cadena,total):
+    print
 def setGamePlayers():
-    print("SGP")
+    total_bot = 0
+    total_per = 0
+    players_in_game=[]
+    printSevenAndHalfTitle(' Select Number of player ')
+    while True:
+        players = int(comprobarInput("seguro que quieres que sean {} . (s/n)".format(players),letras_num=True))
+        if option.lower() == 's':
+            break
+    printSevenAndHalfTitle(' Select player or bot to add to the game ')
+    for i in range(players):
+        crearMenu(['Playes','boot','go back'],')',empezarEnCero==False)
+        option = int(comprobarInput("".format(players),letras_num=True))
+        cadena = 'dni'.ljust(10)+'Nombre'.ljust(10+'')+'level of risc'.rjust(8)+'\n'
+        if option == 1: 
+            for i in players:
+                if i[3]== 1:
+                    total_per += 1
+                    cadena+=str(i[0]).ljust(10)+str(i[1]).ljust(10+'')+str(i[2]).rjust(8)+'\n'
+            select_player(cadena,total=total_per)
+        if option == 2:
+            for i in players:
+                if i[3]== 0:
+                    total_bot +=1 
+                    cadena+=str(i[0]).ljust(10)+str(i[1]).ljust(10+'')+str(i[2]).rjust(8)+'\n'
+            select_player(cadena,total=total_bot)
+        
+        
+
 
 def setCardsDeck():
-    print("SCD")
-
+    while True:
+        printSevenAndHalfTitle(' Select type of deck ')
+        crearMenu(["Spanish Deck","Poker Deck","Go back"],") ",empezarEnCero=False)
+        opcion = int(comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,3)))
+        if opcion == 1:
+            Cards_Deck = 'spain'
+            return Cards_Deck
+        if opcion == 2:
+            Cards_Deck = 'poker'
+            return Cards_Deck
+        else:
+            break
+    
 def setMaxRounds():
-    print("SMR")
+    printSevenAndHalfTitle(' Select max Round to play ')
+    while True:
+        rounds = int(comprobarInput("> ",soloNum=True,))
+        option = comprobarInput("seguro que quieres que sean {}. (s/n)".format(round),letras_num=True)
+        if option.lower() == 's':
+            return round
+        
 
 #Play Functions
 def play():
@@ -261,7 +321,7 @@ def reports():
 ###############################################################################################################
 #Variables
 
-cartas = {
+spain = {
     "O01": {"literal": "As de Oros", "value": 1, "priority": 4, "realValue": 1},
     "O02": {"literal": "Dos de Oros", "value": 2, "priority": 4, "realValue": 2},
     "O03": {"literal": "Tres de Oros", "value": 3, "priority": 4, "realValue": 3},
@@ -304,7 +364,7 @@ cartas = {
     "B10": {"literal": "Rey de Bastos", "value": 10, "priority": 1, "realValue": 0.5},
 }
 
-cartasP = {
+poker = {
     "AC": {"literal": "As de Corazones", "value": 1, "priority": 4, "realValue": 1},
     "2C": {"literal": "Dos de Corazones", "value": 2, "priority": 4, "realValue": 2},
     "3C": {"literal": "Tres de Corazones", "value": 3, "priority": 4, "realValue": 3},
