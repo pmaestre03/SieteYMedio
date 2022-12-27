@@ -8,7 +8,7 @@ conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="p
 cur = conn.cursor()
 query = f"select * from aventura"
 cur.execute(query)
-variable = cur.fetchall()
+variable = cur.fetchall
 '''
 
 while True:
