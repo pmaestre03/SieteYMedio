@@ -246,9 +246,21 @@ def comprobacion_fin(dni,name,level_risc):
         return False
 
 def showPlayersAndRemove():
+    while True:
+        limpiarTerminal()
+        mostrarPlayers()
+        print("-ID para eliminar jugador | 0 para volver atras".center(140))
+        entrada = input(" "*46+"> ")
+        
+        if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
+            query = f"delete from player where dni = '{entrada[1:]}'"
+            cur.execute(query)
+            conn.commit()
+        elif entrada == "0":
+            break
+        else:
+            input("Pon un ID valido y en formato correcto\nPulsa enter para continuar")
 
-    mostrarPlayers()
-    input(":V")
     
 #Settings functions
 def settings():
