@@ -1,4 +1,7 @@
+import pymysql
 from random import *
+conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
+cur = conn.cursor()
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
     for i in range(len(lista)):
@@ -137,7 +140,8 @@ def ranking():
         crearMenu(["Players With More Earnings","Players With More Games Played","Players With More Minutes Played","Go back"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,4))
-
+        query = f"select * from scores"
+        cur.execute(query)
         if opcion == "1":
             showPlayersWithMoreEarning()
         elif opcion == "2":
@@ -148,12 +152,38 @@ def ranking():
             break
 
 def showPlayersWithMoreEarning():
+    var = list(cur.fetchall())
+
+    for pasadas in range(len(var)-1):
+        for comp in range(len(var)-1-pasadas):
+            if var[comp][2] < var[comp+1][2]:
+                var[comp],var[comp+1] = var[comp+1],var[comp]
+    for i in var:
+        listaOrd = f'{i}'
+        print(listaOrd)
+    input()
     print("PWME")
 
 def showPlayersWithMoreGamesPlayed():
+    var = list(cur.fetchall())
+    for pasadas in range(len(var)-1):
+        for comp in range(len(var)-1-pasadas):
+            if var[comp][3] < var[comp+1][3]:
+                var[comp],var[comp+1] = var[comp+1],var[comp]
+    for i in var:
+        listaOrd = f'{i}'
+        print(listaOrd)
     print("PWMGP")
 
 def showPlayersWithMoreMinutesPlayed():
+    var = list(cur.fetchall())
+    for pasadas in range(len(var)-1):
+        for comp in range(len(var)-1-pasadas):
+            if var[comp][4] < var[comp+1][4]:
+                var[comp],var[comp+1] = var[comp+1],var[comp]
+    for i in var:
+        listaOrd = f'{i}'
+        print(listaOrd)
     print("PWMMP")
 
 #Reports Functions
