@@ -134,7 +134,7 @@ def comp_dni():
         print(e)
         comp_dni()
 
-print(comp_dni())
+
 def comp_name():
     try:
         name = input('introduce un name: ')
