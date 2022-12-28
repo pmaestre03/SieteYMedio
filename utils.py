@@ -56,10 +56,10 @@ def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros
             else:
                 input("Solo puedes introducir letras y numeros\nPulsa enter para continuar")
         elif permitirCaractEspeciales:
-            if not opcion.isalnum():
+            if not opcion.isalnum() or opcion.isalnum():
                 return opcion
             else:
-                input("Puedes poner lo que te salga de los huevos y aun asi fallas, que sujeto tan estupido\nPulsa enter para continuar")
+                input("Error\nPulsa enter para continuar")
 
 def printSevenAndHalfTitle(mensajeFinal):
     print("="*107+"\n"+
@@ -121,7 +121,7 @@ def newRandomDNI():
         dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
         dni = f"{dniNumero}{dniLetra}"
 
-        if not checkExistenceDNI(dni):
+        if checkExistenceDNI(dni):
             return dni
 
 def checkExistenceDNI(dni):
@@ -207,7 +207,7 @@ def comp_dni(textoInput):
         if len(nif) == 9:
             if nif[:8].isdigit() and nif[8:].isalpha():
                 if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
-                    if checkExistenceDNI(nif):
+                    if not checkExistenceDNI(nif):
                         raise ValueError('Este DNI ya existe')
                     else:
                         return str(nif)
@@ -254,7 +254,7 @@ def showPlayersAndRemove():
         print("-ID para eliminar jugador | 0 para volver atras".center(140))
         entrada = input(" "*46+"> ")
         
-        if entrada[0] == "-" and checkExistenceDNI(entrada[1:]):
+        if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
             query = f"delete from player where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
@@ -323,13 +323,14 @@ def mostrarPlayers_settings(players_in_game_list=[]):
         print(cadena1)
     print("*"*140)
 
+players_in_game=[]
 def setGamePlayers():
     limpiarTerminal()
-
-    players_in_game=[]
     printSevenAndHalfTitle("")
     crearTitulo("Selecciona el Numero de Jugadores\n",140)
+
     player_in_game()
+
     input("Pulsa enter para contnuar\n")
     while True:
         players = int(comprobarInput("Numero de jugadores: ",soloText=False,soloNum=True,tuplaRangoNumeros=(2,6)))
@@ -338,7 +339,9 @@ def setGamePlayers():
             break
         if option.lower() != 'n':
             print('Opcion no valida')
+
     printSevenAndHalfTitle(' Selecciona un Jugador o Bot para Agregar a la Partida ')
+
     for i in range(players):
         mostrarPlayers_settings(players_in_game_list=players_in_game)
         while True:
@@ -396,7 +399,11 @@ def setMaxRounds():
             return rounds
 #Play Functions
 def play():
-    print("Play")
+    if len(player_in_game) < 2:
+        input("Debe haber más jugadores en la partida para poder empezar\nPulsa enter para continuar")
+    else:
+        limpiarTerminal()
+        print(players_in_game)
 
 #Ranking functions
 def ranking():
