@@ -56,10 +56,10 @@ def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros
             else:
                 input("Solo puedes introducir letras y numeros\nPulsa enter para continuar")
         elif permitirCaractEspeciales:
-            if not opcion.isalnum():
+            if not opcion.isalnum() or opcion.isalnum():
                 return opcion
             else:
-                input("Puedes poner lo que te salga de los huevos y aun asi fallas, que sujeto tan estupido\nPulsa enter para continuar")
+                input("Error\nPulsa enter para continuar")
 
 def printSevenAndHalfTitle(mensajeFinal):
     print("="*140+"\n"+
@@ -120,7 +120,7 @@ def newRandomDNI():
         dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
         dni = f"{dniNumero}{dniLetra}"
 
-        if not checkExistenceDNI(dni):
+        if checkExistenceDNI(dni):
             return dni
 
 def checkExistenceDNI(dni):
@@ -205,7 +205,7 @@ def comp_dni(textoInput):
         if len(nif) == 9:
             if nif[:8].isdigit() and nif[8:].isalpha():
                 if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
-                    if checkExistenceDNI(nif):
+                    if not checkExistenceDNI(nif):
                         raise ValueError('Este DNI ya existe')
                     else:
                         return str(nif)
@@ -252,7 +252,7 @@ def showPlayersAndRemove():
         print("-ID para eliminar jugador | 0 para volver atras".center(140))
         entrada = input(" "*46+"> ")
         
-        if entrada[0] == "-" and checkExistenceDNI(entrada[1:]):
+        if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
             query = f"delete from player where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
@@ -331,6 +331,7 @@ def mostrarPlayers_settings(players_in_game_list=[]):
         print(cadena1)
     print("*"*140)
 
+players_in_game=[]
 def setGamePlayers():
     selecion = True
     limpiarTerminal()
@@ -343,25 +344,43 @@ def setGamePlayers():
         while True:
             option = comprobarInput("Introduce el ID: ",soloText=False,permitirCaractEspeciales=True,excepciones=['-1'])
             if option[0]== '-' and option[1:] in players_in_game:
-                players_in_game.pop(option)  
-            if not checkExistenceDNI(option):
+                input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
+                players_in_game.remove(option[1:])
                 break
-            if option == '-1':
+            elif not checkExistenceDNI(option):
+                players_in_game.append(option)
+                break
+            elif option == '-1':
                 player_in_game(players_in_game=players_in_game)
                 selecion = False
                 break
-            if len(players_in_game) == 6:
+            elif len(players_in_game) == 6:
                 player_in_game(players_in_game=players_in_game)
+
                 selecion = False
-                break  
-                    
+                break   
             else:
                 input("Ese ID no es valido\nPulsa enter para continuar")
-        players_in_game.append(option)
         player_in_game(players_in_game=players_in_game)
-    return players_in_game
+        limpiarTerminal()
+    return lis_dic(players_in_game)
  
-
+def lis_dic(players_in_game):
+    query = f"select * from player"
+    cur.execute(query)
+    players = cur.fetchall()
+    dict_players = {}
+   
+        
+    for i in players_in_game:
+         for j in players:
+            if i == j[0]:
+                if j[3] == 1:
+                    dict_players[i]={"name":j[1],"human":True,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":0,"cards":[],"roundPoints":0}
+                if j[3] == 0:
+                    dict_players[i]={"name":j[1],"human":False,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":0,"cards":[],"roundPoints":0}
+    return dict_players
+print(lis_dic(['41328630E']))
 def player_in_game(players_in_game=[]):
     query = f"select * from player"
     cur.execute(query)
@@ -384,7 +403,7 @@ def player_in_game(players_in_game=[]):
                     print(cadena)  
     input()
 
-setGamePlayers()
+
 def setCardsDeck():
     while True:
         printSevenAndHalfTitle(' Selecciona la Baraja ')
@@ -408,7 +427,11 @@ def setMaxRounds():
             return rounds
 #Play Functions
 def play():
-    print("Play")
+    if len(player_in_game) < 2:
+        input("Debe haber más jugadores en la partida para poder empezar\nPulsa enter para continuar")
+    else:
+        limpiarTerminal()
+        print(players_in_game)
 
 #Ranking functions
 def ranking():
