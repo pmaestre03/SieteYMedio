@@ -26,9 +26,11 @@ def limpiarTerminal():
     print("\n" * 100)
 
 #Nos permite controlar todos los parametros permitidos en un input (excepto textos con caracteres entre medio)
-def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False):
+def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False,excepciones=[]):
     while True:
         opcion = input(textoInput)
+        if opcion in excepciones:
+            return opcion
         if opcion.isspace() or opcion == "":
             input("Introduce algo\nPulsa enter para continuar")
         elif soloText:
