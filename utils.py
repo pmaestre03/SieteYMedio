@@ -70,8 +70,6 @@ def printSevenAndHalfTitle(mensajeFinal):
 "                  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
 mensajeFinal.center(140,"=")+"\n"
 )
-print('*'.center(140,'a'))
-printSevenAndHalfTitle('hola')
 def mostrarPlayers():
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -120,7 +118,7 @@ def newRandomDNI():
         dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
         dni = f"{dniNumero}{dniLetra}"
 
-        if checkExistenceDNI(dni):
+        if not checkExistenceDNI(dni):
             return dni
 
 def checkExistenceDNI(dni):
@@ -128,9 +126,11 @@ def checkExistenceDNI(dni):
     cur.execute(query)
 
     if not cur.fetchall():
-        return True
-    else:
+        return True  
+    if cur.fetchall():
         return False
+    else:
+        return True
 
 def checkExistenceName(name):
     query = f"select * from player where name = '{name}'"
@@ -175,7 +175,7 @@ def newPlayer(esBot=False):
     if esBot:
         dni = newRandomDNI()
     else:
-        dni = comp_dni()
+        dni = comp_dni("Introduce tu dni: ")
     
     while True:
 
@@ -199,14 +199,14 @@ def newPlayer(esBot=False):
 
 
 
-def comp_dni():
+def comp_dni(textoInput):
     lista = ['T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E']
     try:
-        nif = input('Introduce tu dni: ')
+        nif = input(textoInput)
         if len(nif) == 9:
             if nif[:8].isdigit() and nif[8:].isalpha():
                 if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
-                    if not checkExistenceDNI(nif):
+                    if checkExistenceDNI(nif):
                         raise ValueError('Este DNI ya existe')
                     else:
                         return str(nif)
@@ -218,7 +218,7 @@ def comp_dni():
             raise ValueError('EL DNI debe tener 9 caracteres')
     except ValueError as e:
         print(e)
-        return comp_dni()
+        return comp_dni("Introduce tu dni: ")
 
 def selectLevelRisc():
     cadena = 'Escoge un nivel de riesgo\n1) Atrevido \n2) Normal\n3) Prudente\n'
@@ -247,17 +247,29 @@ def comprobacion_fin(dni,name,level_risc):
         return False
 
 def showPlayersAndRemove():
+    while True:
+        limpiarTerminal()
+        mostrarPlayers()
+        print("-ID para eliminar jugador | 0 para volver atras".center(140))
+        entrada = input(" "*46+"> ")
+        
+        if entrada[0] == "-" and checkExistenceDNI(entrada[1:]):
+            query = f"delete from player where dni = '{entrada[1:]}'"
+            cur.execute(query)
+            conn.commit()
+        elif entrada == "0":
+            break
+        else:
+            input("Pon un ID valido y en formato correcto\nPulsa enter para continuar")
 
-    mostrarPlayers()
-    input(":V")
     
 #Settings functions
 def settings():
     settings_game={}
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Settings ")
-        crearMenu(["Set Game Players","Set Card's Deck","Set Max Rounds (Default 5 Rounds)","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(" Configuración ")
+        crearMenu(["Seleccionar Jugadores","Seleccionar Baraja de Cartas","Seleccionar Maximo Rondas (5 Rondas por Defecto)","Atras"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
@@ -322,20 +334,18 @@ def mostrarPlayers_settings(players_in_game_list=[]):
 
 def setGamePlayers():
     limpiarTerminal()
-    player_in_game()
     players_in_game=[]
-    printSevenAndHalfTitle(' Select Number of player ')
+    player_in_game()
+    limpiarTerminal()
+    printSevenAndHalfTitle(' Selecciona un Jugador o Bot para Agregar a la Partida ')
     while True:
-        players = int(comprobarInput("number of players: ",soloText=False,soloNum=True))
-        option= comprobarInput("seguro que quieres que sean {} Players? . (s/n)".format(players),soloText=True)
-        if option.lower() == 's':
-            break
-        if option.lower() != 'n':
-            print('no valid option')
-    printSevenAndHalfTitle(' Select player or bot to add to the game ')
-    for i in range(players):
         mostrarPlayers_settings(players_in_game_list=players_in_game)
-        option = comp_dni()
+        while True:
+            option = comprobarInput("Introduce el ID: ",soloText=False,letras_num=True)
+            if not checkExistenceDNI(option):
+                break
+            else:
+                input("Ese ID no es valido\nPulsa enter para continuar")
         players_in_game.append(option)
         player_in_game(players_in_game=players_in_game)
     return players_in_game
@@ -348,25 +358,25 @@ def player_in_game(players_in_game=[]):
     pjs= []
     for i in players:
         pjs.append(i)
-    cadena = 'Actual players in game'.center(70,'*').center(140,' ')
+    cadena = ' Jugadores Actuales en la Partida '.center(70,'*').center(140,' ')
     print(cadena)
     if len(players_in_game) == 0:
-        print('no players'.center(140,' '))
+        print('No hay Jugadores'.center(140,' '))
     else:
         for i in players_in_game:
             for j in pjs:
                 if j[0] == i:
                     if j[3] == 1:
-                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'humano'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
+                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'Humano'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
                     if j[3] == 0:
-                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'boot'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
+                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'Boot'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
                     print(cadena)  
     input()
 
 def setCardsDeck():
     while True:
-        printSevenAndHalfTitle(' Select type of deck ')
-        crearMenu(["Spanish Deck","Poker Deck","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(' Selecciona la Baraja ')
+        crearMenu(["Baraja Española","Baraja de Poker","Atras"],") ",empezarEnCero=False)
         opcion = int(comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,3)))
         if opcion == 1:
             Cards_Deck = 'spain'
@@ -378,12 +388,12 @@ def setCardsDeck():
             break
     
 def setMaxRounds():
-    printSevenAndHalfTitle(' Select max Round to play ')
+    printSevenAndHalfTitle('')
     while True:
-        rounds = int(comprobarInput("> ",solotext = False,soloNum=True,))
-        option = comprobarInput("seguro que quieres que sean {}. (s/n)".format(round),letras_num=True)
+        rounds = int(comprobarInput("Selecciona el Maximo de Rondas a Jugar\n> ",soloText = False,soloNum=True,tuplaRangoNumeros=(5,30)))
+        option = comprobarInput("Seguro que quieres que sean {} rondas? S/n\n> ".format(rounds),letras_num=True)
         if option.lower() == 's':
-            return round
+            return rounds
 #Play Functions
 def play():
     print("Play")
@@ -392,8 +402,8 @@ def play():
 def ranking():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Ranking ")
-        crearMenu(["Players With More Earnings","Players With More Games Played","Players With More Minutes Played","Go back"],") ",empezarEnCero=False)
+        printSevenAndHalfTitle(" Clasificación ")
+        crearMenu(["Jugadores con más Puntos","Jugadores con más Partidas Jugadas","Jugadores con más Minutos Jugados","Atras"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
@@ -419,7 +429,7 @@ def showPlayersWithMoreMinutesPlayed():
 def reports():
     limpiarTerminal()
     while True:
-        printSevenAndHalfTitle(" Ranking ")
+        printSevenAndHalfTitle(" Reportes ")
         crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
