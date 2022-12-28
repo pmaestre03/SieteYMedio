@@ -119,17 +119,17 @@ def newRandomDNI():
         dniLetra = "TRWAGMYFPDXBNJZSQVHLCKE"[dniNumero % 23]
         dni = f"{dniNumero}{dniLetra}"
 
-        if checkExistenceDNI(dni):
+        if not checkExistenceDNI(dni):
             return dni
 
 def checkExistenceDNI(dni):
     query = f"select * from player where dni = '{dni}'"
     cur.execute(query)
     
-    if not cur.fetchall():
-        return True
-    else:
+    if cur.fetchall():
         return False
+    else:
+        return True
 
 def checkExistenceName(name):
     query = f"select * from player where name = '{name}'"
@@ -205,7 +205,7 @@ def comp_dni(textoInput):
         if len(nif) == 9:
             if nif[:8].isdigit() and nif[8:].isalpha():
                 if nif[8:].lower() == lista[int(nif[:8]) % 23].lower():
-                    if not checkExistenceDNI(nif):
+                    if checkExistenceDNI(nif):
                         raise ValueError('Este DNI ya existe')
                     else:
                         return str(nif)
@@ -252,7 +252,7 @@ def showPlayersAndRemove():
         print("-ID para eliminar jugador | 0 para volver atras".center(140))
         entrada = input(" "*46+"> ")
         
-        if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
+        if entrada[0] == "-" and checkExistenceDNI(entrada[1:]):
             query = f"delete from player where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
@@ -330,7 +330,7 @@ def setGamePlayers():
     player_in_game()
     input("Pulsa enter para contnuar\n")
     while True:
-        players = int(comprobarInput("Numero de jugadores: ",soloText=False,soloNum=True))
+        players = int(comprobarInput("Numero de jugadores: ",soloText=False,soloNum=True,tuplaRangoNumeros=(2,6)))
         option= comprobarInput("Seguro que quieres que sean {} jugadores? S/n\n> ".format(players),soloText=True)
         if option.lower() == 's':
             break
@@ -366,9 +366,9 @@ def player_in_game(players_in_game=[]):
             for j in pjs:
                 if j[0] == i:
                     if j[3] == 1:
-                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'humano'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
+                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'Humano'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
                     if j[3] == 0:
-                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'boot'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
+                        cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'Boot'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
                     print(cadena)  
 
 def setCardsDeck():
@@ -388,7 +388,7 @@ def setCardsDeck():
 def setMaxRounds():
     printSevenAndHalfTitle('')
     while True:
-        rounds = int(comprobarInput("Selecciona el Maximo de Rondas a Jugar\n> ",soloText = False,soloNum=True,))
+        rounds = int(comprobarInput("Selecciona el Maximo de Rondas a Jugar\n> ",soloText = False,soloNum=True,tuplaRangoNumeros=(5,30)))
         option = comprobarInput("Seguro que quieres que sean {} rondas? S/n\n> ".format(rounds),letras_num=True)
         if option.lower() == 's':
             return rounds
