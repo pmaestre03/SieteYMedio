@@ -60,17 +60,18 @@ def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros
                 input("Puedes poner lo que te salga de los huevos y aun asi fallas, que sujeto tan estupido\nPulsa enter para continuar")
 
 def printSevenAndHalfTitle(mensajeFinal):
-    print("="*107+"\n"+
-"  #####                                          #                         #     #                        \n"
-" #     #  ######  #    #  ######  #    #        # #    #    #  #####       #     #    ##    #       ######\n"
-" #        #       #    #  #       ##   #       #   #   ##   #  #    #      #     #   #  #   #       #     \n"
-"  #####   #####   #    #  #####   # #  #      #     #  # #  #  #    #      #######  #    #  #       ##### \n"
-"       #  #       #    #  #       #  # #      #######  #  # #  #    #      #     #  ######  #       #     \n"
-" #     #  #        #  #   #       #   ##      #     #  #   ##  #    #      #     #  #    #  #       #     \n"
-"  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
-mensajeFinal.center(107,"=")+"\n"
+    print("="*140+"\n"+
+"                 #####                                          #                         #     #                        \n"
+"                 #     #  ######  #    #  ######  #    #        # #    #    #  #####       #     #    ##    #       ######\n"
+"                 #        #       #    #  #       ##   #       #   #   ##   #  #    #      #     #   #  #   #       #     \n"
+"                  #####   #####   #    #  #####   # #  #      #     #  # #  #  #    #      #######  #    #  #       ##### \n"
+"                       #  #       #    #  #       #  # #      #######  #  # #  #    #      #     #  ######  #       #     \n"
+"                 #     #  #        #  #   #       #   ##      #     #  #   ##  #    #      #     #  #    #  #       #     \n"
+"                  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
+mensajeFinal.center(140,"=")+"\n"
 )
-
+print('*'.center(140,'a'))
+printSevenAndHalfTitle('hola')
 def mostrarPlayers():
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -125,13 +126,7 @@ def newRandomDNI():
 def checkExistenceDNI(dni):
     query = f"select * from player where dni = '{dni}'"
     cur.execute(query)
-    player = cur.fetchall()
-    player_dnis = []
-    player_names = []
-    for i in player:
-        player_dnis.append(i[0])
-        player_names.append(i[1])
-    
+
     if not cur.fetchall():
         return True
     else:
@@ -258,6 +253,7 @@ def showPlayersAndRemove():
     
 #Settings functions
 def settings():
+    settings_game={}
     limpiarTerminal()
     while True:
         printSevenAndHalfTitle(" Settings ")
@@ -266,14 +262,23 @@ def settings():
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
-            setGamePlayers()
+            players =setGamePlayers()
         elif opcion == "2":
-            setCardsDeck()
+            cartas = setCardsDeck()
         elif opcion == "3":
-            setMaxRounds()
+            rondas = setMaxRounds()
         else:
+            if len(players)== 0 or cartas =='' or rondas == 0:
+                while True:
+                    option= comprobarInput("seguro que quieres que sean {} Players? . (s/n)".format(players),soloText=True)
+                    if option.lower() == 's':
+                        break
+                    if option.lower() != 'n':
+                        print('no valid option')
+            else:
+                settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'type_cards':cartas}
+                break
             break
-
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -316,9 +321,10 @@ def mostrarPlayers_settings(players_in_game_list=[]):
     print("*"*140)
 
 def setGamePlayers():
+    limpiarTerminal()
     player_in_game()
     players_in_game=[]
-    printSevenAndHalfTitle(' Select Number of player '.center(140,' '))
+    printSevenAndHalfTitle(' Select Number of player ')
     while True:
         players = int(comprobarInput("number of players: ",soloText=False,soloNum=True))
         option= comprobarInput("seguro que quieres que sean {} Players? . (s/n)".format(players),soloText=True)
@@ -335,7 +341,7 @@ def setGamePlayers():
     return players_in_game
  
 
-def player_in_game(players_in_game=['48066800C' ]):
+def player_in_game(players_in_game=[]):
     query = f"select * from player"
     cur.execute(query)
     players = cur.fetchall()
@@ -355,6 +361,7 @@ def player_in_game(players_in_game=['48066800C' ]):
                     if j[3] == 0:
                         cadena = (j[0].ljust(16)+" "+j[1].ljust(22)+" "+'boot'.ljust(16)+reisgoEnTexto(j[2]).ljust(23)).center(150,' ')
                     print(cadena)  
+    input()
 
 def setCardsDeck():
     while True:

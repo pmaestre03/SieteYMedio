@@ -10,13 +10,13 @@ query = f"select * from aventura"
 cur.execute(query)
 variable = cur.fetchall
 '''
-
+2
 while True:
     limpiarTerminal()
     printSevenAndHalfTitle("")
     crearMenu(["Add/Remove/Show Players","Settings","Play Game","Ranking","Reports","Exit"],") ",empezarEnCero=False)
 
-    opcion = comprobarInput("> ",soloNum=True,tuplaRangoNumeros=(1,6))
+    opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
 
     if opcion == "1":
         playersConf()
