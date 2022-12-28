@@ -126,9 +126,6 @@ def newRandomDNI():
 def checkExistenceDNI(dni):
     query = f"select * from player where dni = '{dni}'"
     cur.execute(query)
-
-    if not cur.fetchall():
-        return True  
     if cur.fetchall():
         return False
     else:
@@ -335,17 +332,29 @@ def mostrarPlayers_settings(players_in_game_list=[]):
     print("*"*140)
 
 def setGamePlayers():
+    selecion = True
     limpiarTerminal()
     players_in_game=[]
     player_in_game()
     limpiarTerminal()
     printSevenAndHalfTitle(' Selecciona un Jugador o Bot para Agregar a la Partida ')
-    while True:
+    while selecion:
         mostrarPlayers_settings(players_in_game_list=players_in_game)
         while True:
-            option = comprobarInput("Introduce el ID: ",soloText=False,letras_num=True)
+            option = comprobarInput("Introduce el ID: ",soloText=False,permitirCaractEspeciales=True,excepciones=['-1'])
+            if option[0]== '-' and option[1:] in players_in_game:
+                players_in_game.pop(option)  
             if not checkExistenceDNI(option):
                 break
+            if option == '-1':
+                player_in_game(players_in_game=players_in_game)
+                selecion = False
+                break
+            if len(players_in_game) == 6:
+                player_in_game(players_in_game=players_in_game)
+                selecion = False
+                break  
+                    
             else:
                 input("Ese ID no es valido\nPulsa enter para continuar")
         players_in_game.append(option)
@@ -375,6 +384,7 @@ def player_in_game(players_in_game=[]):
                     print(cadena)  
     input()
 
+setGamePlayers()
 def setCardsDeck():
     while True:
         printSevenAndHalfTitle(' Selecciona la Baraja ')
