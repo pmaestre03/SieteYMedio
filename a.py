@@ -43,6 +43,7 @@ cartasES = {
     "B10": {"literal": "Rey de Bastos", "value": 10, "priority": 1, "realValue": 0.5},
 }
 
+cartas = cartasES
 players = {
 "11115555A":{"name":"Mario","human":True,"bank":False,"initialCard":"","priority":0
 ,"type":40,"bet":0,"points":0,"cards":[],"roundPoints":0},
@@ -55,15 +56,15 @@ def burbujaPrioridad(lista):
     for i in range(len(lista)):
         for j in range(0, len(lista)-i-1):
 
-            numero1 = cartasES[lista[j]]["value"]
-            numero2 = cartasES[lista[j+1]]["value"]
+            numero1 = cartas[lista[j]]["value"]
+            numero2 = cartas[lista[j+1]]["value"]
 
             if numero1 < numero2:
                 lista[j], lista[j+1] = lista[j+1], lista[j]
             elif numero1 == numero2:
 
-                numero1 = cartasES[lista[j]]["priority"]
-                numero2 = cartasES[lista[j+1]]["priority"]
+                numero1 = cartas[lista[j]]["priority"]
+                numero2 = cartas[lista[j+1]]["priority"]
 
                 if numero1 < numero2:
                     lista[j], lista[j+1] = lista[j+1], lista[j]
@@ -72,24 +73,24 @@ def generarPrioridad():
     player_in_game = list(players.keys())
 
     mazo = []
-    for i in cartasES:
+    for i in cartas:
         mazo.append(i)
 
     shuffle(mazo)
 
-    cartasESIniciales = []
+    cartasIniciales = []
     for i in range(len(player_in_game)):
         jugadorActual = player_in_game[i]
         players[jugadorActual]["initialCard"] = mazo[i]
 
-        cartasESIniciales.append(mazo[i])
+        cartasIniciales.append(mazo[i])
 
-    burbujaPrioridad(cartasESIniciales)
+    burbujaPrioridad(cartasIniciales)
 
     for i in range(len(player_in_game)):
         jugadorActual = player_in_game[i]
         cartaInicalJugador = players[jugadorActual]["initialCard"]
-        players[jugadorActual]["priority"] = len(cartasESIniciales) - cartasESIniciales.index(cartaInicalJugador)
+        players[jugadorActual]["priority"] = len(cartasIniciales) - cartasIniciales.index(cartaInicalJugador)
 
 print(players)
 
