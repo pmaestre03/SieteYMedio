@@ -1,6 +1,6 @@
 from random import *
 
-cartas = {
+cartasES = {
     "O01": {"literal": "As de Oros", "value": 1, "priority": 4, "realValue": 1},
     "O02": {"literal": "Dos de Oros", "value": 2, "priority": 4, "realValue": 2},
     "O03": {"literal": "Tres de Oros", "value": 3, "priority": 4, "realValue": 3},
@@ -55,41 +55,41 @@ def burbujaPrioridad(lista):
     for i in range(len(lista)):
         for j in range(0, len(lista)-i-1):
 
-            numero1 = cartas[lista[j]]["value"]
-            numero2 = cartas[lista[j+1]]["value"]
+            numero1 = cartasES[lista[j]]["value"]
+            numero2 = cartasES[lista[j+1]]["value"]
 
             if numero1 < numero2:
                 lista[j], lista[j+1] = lista[j+1], lista[j]
             elif numero1 == numero2:
 
-                numero1 = cartas[lista[j]]["priority"]
-                numero2 = cartas[lista[j+1]]["priority"]
+                numero1 = cartasES[lista[j]]["priority"]
+                numero2 = cartasES[lista[j+1]]["priority"]
 
                 if numero1 < numero2:
                     lista[j], lista[j+1] = lista[j+1], lista[j]
 
-player_in_game = list(players.keys())
+def generarPrioridad():
+    player_in_game = list(players.keys())
 
-mazo = []
-for i in cartas:
-    mazo.append(i)
+    mazo = []
+    for i in cartasES:
+        mazo.append(i)
 
-shuffle(mazo)
+    shuffle(mazo)
 
-cartasIniciales = []
-for i in range(len(player_in_game)):
-    jugadorActual = player_in_game[i]
-    players[jugadorActual]["initialCard"] = mazo[i]
+    cartasESIniciales = []
+    for i in range(len(player_in_game)):
+        jugadorActual = player_in_game[i]
+        players[jugadorActual]["initialCard"] = mazo[i]
 
-    cartasIniciales.append(mazo[i])
+        cartasESIniciales.append(mazo[i])
 
-burbujaPrioridad(cartasIniciales)
-print(cartasIniciales)
+    burbujaPrioridad(cartasESIniciales)
 
-for i in range(len(player_in_game)):
-    jugadorActual = player_in_game[i]
-    cartaInicalJugador = players[jugadorActual]["initialCard"]
-    players[jugadorActual]["priority"] = len(cartasIniciales) - cartasIniciales.index(cartaInicalJugador)
+    for i in range(len(player_in_game)):
+        jugadorActual = player_in_game[i]
+        cartaInicalJugador = players[jugadorActual]["initialCard"]
+        players[jugadorActual]["priority"] = len(cartasESIniciales) - cartasESIniciales.index(cartaInicalJugador)
 
 print(players)
 
