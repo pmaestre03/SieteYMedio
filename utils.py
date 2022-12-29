@@ -279,17 +279,12 @@ def settings():
         elif opcion == "3":
             rondas = setMaxRounds()
         else:
-            if len(players)== 0 or cartas =='' or rondas == 0:
-                while True:
-                    option= comprobarInput("seguro que quieres que sean {} Players? . (s/n)".format(players),soloText=True)
-                    if option.lower() == 's':
-                        break
-                    if option.lower() != 'n':
-                        print('no valid option')
-            else:
-                settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'type_cards':cartas}
-                break
-            break
+            if cartas == '':
+                    cartas== 'cartasES'
+            if rondas == 0:
+                    rondas == 5
+            settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'type_cards':cartas}
+            return settings_game
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
