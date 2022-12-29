@@ -280,7 +280,7 @@ def settings():
             rondas = setMaxRounds()
         else:
             if cartas == '':
-                    cartas== 'cartasES'
+                    cartas== cartasES
             if rondas == 0:
                     rondas == 5
             settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'type_cards':cartas}
@@ -475,7 +475,7 @@ def reports():
 ###############################################################################################################
 #Variables
 
-cartas = {
+cartasES = {
     "O01": {"literal": "As de Oros", "value": 1, "priority": 4, "realValue": 1},
     "O02": {"literal": "Dos de Oros", "value": 2, "priority": 4, "realValue": 2},
     "O03": {"literal": "Tres de Oros", "value": 3, "priority": 4, "realValue": 3},
@@ -518,7 +518,7 @@ cartas = {
     "B10": {"literal": "Rey de Bastos", "value": 10, "priority": 1, "realValue": 0.5},
 }
 
-cartasP = {
+cartasPoker = {
     "AC": {"literal": "As de Corazones", "value": 1, "priority": 4, "realValue": 1},
     "2C": {"literal": "Dos de Corazones", "value": 2, "priority": 4, "realValue": 2},
     "3C": {"literal": "Tres de Corazones", "value": 3, "priority": 4, "realValue": 3},
