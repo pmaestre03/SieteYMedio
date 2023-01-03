@@ -45,10 +45,14 @@ cartasES = {
 
 cartas = cartasES
 players = {
-"11115555A":{"name":"Mario","human":True,"bank":False,"initialCard":"","priority":0
-,"type":40,"bet":0,"points":0,"cards":[],"roundPoints":0},
-"22225555A":{"name":"Pedro","human":True,"bank":False,"initialCard":"","priority":0
-,"type":40,"bet":0,"points":0,"cards":[],"roundPoints":0}
+"11115555A":{"name":"Mario","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0},
+"22225555A":{"name":"Pedro","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0},
+"22225554A":{"name":"jose","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0},
+"22225553A":{"name":"marcos","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0}
 }
 
 def burbujaPrioridad(lista):
@@ -104,11 +108,30 @@ def ordenar_prioridad():
                 lista[j] = lista[j + 1]
                 lista[j + 1] = numero
     return lista
+def mesa(lista):
+    for i in players:
+        si = list(players[i].keys())
+    cadena = ''
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in range(3):
+            for i in players:
+                if lista[j] == players[i]['priority']:
+                    cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
+    print('-'*140)
+    cadena = ''
+    lista=lista[3:]
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in lista:
+            for i in players:
+                if j == players[i]['priority']:
+                    cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
 generarPrioridad()
 lista = ordenar_prioridad()
-for j in lista:
-    for i in players:
-        if j == players[i]['priority']:
-            print(i,players[i])
-
+mesa(lista)
 
