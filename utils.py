@@ -384,9 +384,9 @@ def lis_dic(players_in_game):
          for j in players:
             if i == j[0]:
                 if j[3] == 1:
-                    dict_players[i]={"name":j[1],"human":True,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":0,"cards":[],"roundPoints":0}
+                    dict_players[i]={"name":j[1],"human":True,"priority":0,"type":j[2],"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"","roundPoints":0}
                 if j[3] == 0:
-                    dict_players[i]={"name":j[1],"human":False,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":0,"cards":[],"roundPoints":0}
+                    dict_players[i]={"name":j[1],"human":False,"priority":0,"type":j[2],"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"","roundPoints":0}
     return dict_players
     
 def player_in_game(players_in_game=[]):
