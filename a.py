@@ -91,6 +91,8 @@ def generarPrioridad():
         jugadorActual = player_in_game[i]
         cartaInicalJugador = players[jugadorActual]["initialCard"]
         players[jugadorActual]["priority"] = len(cartasIniciales) - cartasIniciales.index(cartaInicalJugador)
+        if players[jugadorActual]["priority"] == len(cartasIniciales):
+            players[jugadorActual]["bank"] = True
 
 def ordenar_prioridad():
     lista = []
@@ -99,7 +101,7 @@ def ordenar_prioridad():
 
     for i in range(len(lista) - 1):
         for j in range(len(lista) - i - 1):
-            if lista[j] < lista[j + 1]:
+            if lista[j] > lista[j + 1]:
                 numero = lista[j]
                 lista[j] = lista[j + 1]
                 lista[j + 1] = numero
