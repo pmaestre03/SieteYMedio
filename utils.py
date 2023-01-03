@@ -265,7 +265,11 @@ def showPlayersAndRemove():
     
 #Settings functions
 def settings():
-    settings_game={}
+    global settings_game
+    settings_game = {}
+    cartas = ""
+    rondas = 0
+
     limpiarTerminal()
     while True:
         printSevenAndHalfTitle(" Configuración ")
@@ -274,6 +278,7 @@ def settings():
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
+            global players
             players =setGamePlayers()
         elif opcion == "2":
             cartas = setCardsDeck()
@@ -285,7 +290,8 @@ def settings():
             if rondas == 0:
                     rondas == 5
             settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'type_cards':cartas}
-            return settings_game
+            return
+
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -322,7 +328,11 @@ def mostrarPlayers_settings(players_in_game_list=[]):
             if not bList[0] in players_in_game_list:
                 cadena1 += bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1)
             if not hList[0] in players_in_game_list:
-                cadena1 +=hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+                if bList[0] in players_in_game_list:
+                    cadena1 += ' '*69+"||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+                else:
+                    cadena1 +=hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+
             else:
                 cadena1 += ' '*69+"||".ljust(1)
            
@@ -424,7 +434,11 @@ def setMaxRounds():
         if option.lower() == 's':
             return rounds
 #Play Functions
+
+#dictPlayersGame = setGamePlayers()
+
 def play():
+    print(settings_game)
     if len(player_in_game) < 2:
         input("Debes al menos 2 jugadores en la partida para poder empezar\nPulsa enter para continuar")
     else:
