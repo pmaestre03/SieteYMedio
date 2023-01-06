@@ -5,7 +5,7 @@ from variables import *
 conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
 
-settings_game={}
+settings_game = {'n_players':0}
 
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True):
@@ -140,7 +140,15 @@ def checkExistenceName(name):
         return True
     else:
         return False
+
+def returnBarajaMezclada(mazo):
+    baraja = []
+    for i in mazo:
+        baraja.append(i)
     
+    shuffle(baraja)
+    return baraja
+
 
 #Players conf functions
 def playersConf():
@@ -265,7 +273,10 @@ def showPlayersAndRemove():
     
 #Settings functions
 def settings():
-    
+    global settings_game
+    cartas = ""
+    rondas = 5
+
     limpiarTerminal()
 
     while True:
@@ -275,22 +286,17 @@ def settings():
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
-            dictPlayers = setGamePlayers()
+            players =setGamePlayers()
         elif opcion == "2":
             cartas = setCardsDeck()
         elif opcion == "3":
             rondas = setMaxRounds()
-            settings_game = {'n_players':len(dictPlayers),'players':dictPlayers,'maxRounds':rondas,"actualRound" : 0,'deck':cartas}
-
-        elif opcion == "4":
-            break
+            settings_game = {'n_players':len(players),'players':players,'n_rounds':rondas,'deck':cartas}
         else:
-            if not cartas:
-                    cartas== cartasES
-            if not rondas:
-                    rondas == 5
-            settings_game = {'n_players':len(dictPlayers),'players':dictPlayers,'maxRounds':rondas,"actualRound" : 0,'deck':cartas}
-
+            if cartas == "":
+                    cartas = cartasES
+            settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'deck':cartas}
+            return
 
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
@@ -334,15 +340,35 @@ def mostrarPlayers_settings(players_in_game_list=[]):
                 if bList[0] in players_in_game_list:
                     cadena1 += ' '*69+"||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
                 else:
-                    cadena1 += hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+                    cadena1 +=hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
+
             else:
                 cadena1 += ' '*69+"||".ljust(1)
 
         print(cadena1)
     print("*"*140)
 
-def show_player_in_game(players_in_game):
-
+def lis_dic(players_in_game):
+    query = f"select * from player"
+    cur.execute(query)
+    players = cur.fetchall()
+    dict_players = {} 
+    for i in players_in_game:
+        for j in players:
+            if i == j[0]:
+                if j[3] == 1:
+                    dict_players[i]={"name":j[1],"human":True,"priority":0,"type":j[2],"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"","roundPoints":0}
+                if j[3] == 0:
+                    dict_players[i]={"name":j[1],"human":False,"priority":0,"type":j[2],"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"","roundPoints":0}
+    return dict_players
+    
+def player_in_game(players_in_game=[]):
+    query = f"select * from player"
+    cur.execute(query)
+    players = cur.fetchall()
+    pjs= []
+    for i in players:
+        pjs.append(i)
     cadena = ' Jugadores Actuales en la Partida '.center(70,'*').center(140,' ')
     print(cadena)
     
@@ -388,7 +414,7 @@ def setGamePlayers():
         limpiarTerminal()
 
         players_in_game=[]
-        show_player_in_game(players_in_game)
+        player_in_game(players_in_game)
         
         limpiarTerminal()
         printSevenAndHalfTitle(' Selecciona un Jugador o Bot para Agregar a la Partida ')
@@ -411,16 +437,16 @@ def setGamePlayers():
                     break
 
                 elif option == '-1':
-                    show_player_in_game(players_in_game=players_in_game)
+                    player_in_game(players_in_game=players_in_game)
                     selecion = False
                     break
                 elif len(players_in_game) == 6:
-                    show_player_in_game(players_in_game=players_in_game)
+                    player_in_game(players_in_game=players_in_game)
                     selecion = False
                     break   
                 else:
                     input("Ese ID no es valido\nPulsa enter para continuar")
-            show_player_in_game(players_in_game=players_in_game)
+            player_in_game(players_in_game=players_in_game)
             limpiarTerminal()
         return lis_dic(players_in_game)
 
@@ -448,6 +474,7 @@ def setMaxRounds():
             return rounds
 #Play Functions
 def burbujaPrioridad(lista):
+    cartas = settings_game['deck']
 
     for i in range(len(lista)):
         for j in range(0, len(lista)-i-1):
@@ -466,13 +493,11 @@ def burbujaPrioridad(lista):
                     lista[j], lista[j+1] = lista[j+1], lista[j]
 
 def generarPrioridad():
+    players = settings_game["players"]
+
     player_in_game = list(players.keys())
 
-    mazo = []
-    for i in cartas:
-        mazo.append(i)
-
-    shuffle(mazo)
+    mazo = returnBarajaMezclada(settings_game["deck"])
 
     cartasIniciales = []
     for i in range(len(player_in_game)):
@@ -489,35 +514,103 @@ def generarPrioridad():
         players[jugadorActual]["priority"] = len(cartasIniciales) - cartasIniciales.index(cartaInicalJugador)
         if players[jugadorActual]["priority"] == len(cartasIniciales):
             players[jugadorActual]["bank"] = True
-    
 
-print(settings_game)
+#settings_game = {'n_players':len(players),'players':players,'n_rounds':rondas,'deck':cartas}
 
 def ordenar_prioridad():
     lista = []
-    for i in dictPlayers:
-        lista.append(players[i]['priority'])
+    for i in settings_game["players"]:
+        lista.append(settings_game["players"][i]['priority'])
 
     for i in range(len(lista) - 1):
         for j in range(len(lista) - i - 1):
-            if lista[j] < lista[j + 1]:
+            if lista[j] > lista[j + 1]:
                 numero = lista[j]
                 lista[j] = lista[j + 1]
                 lista[j + 1] = numero
     return lista
 
-players = ordenar_prioridad()
+def mesa(lista):
+    players = settings_game["players"]
+
+    for i in players:
+        si = list(players[i].keys())
+    cadena = ''
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in range(3):
+            for i in players:
+                if lista[j] == players[i]['priority']:
+                    cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
+    print('-'*140)
+    cadena = ''
+    lista=lista[3:]
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in lista:
+            for i in players:
+                if j == players[i]['priority']:
+                    cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
+
+def turnoBot(cartasEnBaraja,mazo, puntos, rasgo):
+    if puntos == 0 or puntos == 0.5:
+        return True
+    else:
+        cartasNoPasarse = 0
+        cartasPasarse = 0
+        for carta in cartasEnBaraja:
+            valorCarta = mazo[carta]["realValue"]
+            if puntos + valorCarta > 7.5:
+                cartasPasarse += 1
+            else:
+                cartasNoPasarse += 1
+        
+        CartasPorSalir = len(cartasEnBaraja)
+        formula = (cartasPasarse/CartasPorSalir)*100
+        if formula > rasgo:
+            return False
+        else:
+            return True
 
 def play():
-    if len(dictPlayers) < 2:
+    if settings_game["n_players"] < 2:
         input("Debes al menos 2 jugadores en la partida para poder empezar\nPulsa enter para continuar")
-        print(dictPlayers)
     else:
-        for i in range(rondas):
-            input("xd")
-            for j in dictPlayers:
-                limpiarTerminal()
-                print("i = ",i,"\nj = ",j)
+        
+        generarPrioridad()
+
+        mazo = settings_game["deck"]
+        
+        for ronda in range(settings_game["n_rouds"]):
+            baraja = returnBarajaMezclada(settings_game["deck"])
+            for prioridadJugador in ordenar_prioridad():
+                for jugador in settings_game["players"]:
+                    if settings_game["players"][jugador]["priority"] == prioridadJugador:
+                        limpiarTerminal()
+                        printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
+                        if settings_game["players"][jugador]["human"] == False:
+                            
+                            rasgo = settings_game["players"][jugador]["type"]
+                            while True:
+                                puntos = settings_game["players"][jugador]["points"]
+
+                                if turnoBot(baraja,mazo,puntos,rasgo):
+                                    elemento0 = baraja[0]
+
+                                    settings_game["players"][jugador]["points"] += cartasES[elemento0]["realValue"]
+
+                                    baraja.remove(elemento0)
+                                else:
+                                    break
+                                print("Baraja len:",len(baraja),"- Puntos:",settings_game["players"][jugador]["points"])
+                                input()
+                        else:
+                            print("uwu")
+                        input()
                 
 
 #Ranking functions

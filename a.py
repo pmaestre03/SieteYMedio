@@ -45,10 +45,14 @@ cartasES = {
 
 cartas = cartasES
 players = {
-"11115555A":{"name":"Mario","human":True,"bank":False,"initialCard":"","priority":0
-,"type":40,"bet":0,"points":0,"cards":[],"roundPoints":0},
-"22225555A":{"name":"Pedro","human":True,"bank":False,"initialCard":"","priority":0
-,"type":40,"bet":0,"points":0,"cards":[],"roundPoints":0}
+"11115555A":{"name":"Mario","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0},
+"22225555A":{"name":"Pedro","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0},
+"22225554A":{"name":"jose","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0},
+"22225553A":{"name":"marcos","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"roundPoints":0}
 }
 
 def burbujaPrioridad(lista):
@@ -94,6 +98,7 @@ def generarPrioridad():
         if players[jugadorActual]["priority"] == len(cartasIniciales):
             players[jugadorActual]["bank"] = True
 
+
 def ordenar_prioridad():
     lista = []
     for i in players:
@@ -106,11 +111,83 @@ def ordenar_prioridad():
                 lista[j] = lista[j + 1]
                 lista[j + 1] = numero
     return lista
-generarPrioridad()
-lista = ordenar_prioridad()
-for j in lista:
+
+
+def mesa(lista):
     for i in players:
-        if j == players[i]['priority']:
-            print(i,players[i])
+        si = list(players[i].keys())
+    cadena = ''
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in range(3):
+            for i in players:
+                if lista[j] == players[i]['priority']:
+                    cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
+    print('-'*140)
+    cadena = ''
+    lista=lista[3:]
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in lista:
+            for i in players:
+                if j == players[i]['priority']:
+                    cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
 
 
+
+def decisionBot(cartasEnBaraja,mazo, puntos, rasgo, banca=False):
+    if puntos == 0 or puntos == 0.5:
+        return True
+    else:
+        cartasNoPasarse = 0
+        cartasPasarse = 0
+        for carta in cartasEnBaraja:
+            valorCarta = mazo[carta]["realValue"]
+            if puntos + valorCarta > 7.5:
+                cartasPasarse += 1
+            else:
+                cartasNoPasarse += 1
+        
+        CartasPorSalir = len(cartasEnBaraja)
+        formula = (cartasPasarse/CartasPorSalir)*100
+        if formula > rasgo:
+            return False
+        else:
+            return True
+
+def returnBarajaMezclada(mazo):
+    baraja = []
+    for i in mazo:
+        baraja.append(i)
+    
+    shuffle(baraja)
+    return baraja
+
+
+baraja = returnBarajaMezclada()
+puntos = 0
+rasgo = 50
+while True:
+    print("Baraja len:",len(baraja))
+    
+
+    if decisionBot(baraja,cartasES,puntos,rasgo):
+        elemento0 = baraja[0]
+
+        puntos += cartasES[elemento0]["realValue"]
+
+        baraja.remove(elemento0)
+        print("Coge carta")
+    else:
+        print("No")
+        break
+
+    input()
+    print("Baraja len:",len(baraja),"- Puntos:",puntos)
+
+print("Finalita el turno")
+    
