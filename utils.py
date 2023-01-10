@@ -582,31 +582,32 @@ def play():
     else:
         
         generarPrioridad()
+        listaPrioridad = ordenar_prioridad()
 
         mazo = settings_game["deck"]
         
         for ronda in range(settings_game["n_rouds"]):
             baraja = returnBarajaMezclada(settings_game["deck"])
-            for prioridadJugador in ordenar_prioridad():
+            for prioridadJugador in listaPrioridad:
                 for jugador in settings_game["players"]:
                     if settings_game["players"][jugador]["priority"] == prioridadJugador:
                         limpiarTerminal()
                         printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
                         if settings_game["players"][jugador]["human"] == False:
-                            
+
                             rasgo = settings_game["players"][jugador]["type"]
                             while True:
-                                puntos = settings_game["players"][jugador]["points"]
+                                puntos = settings_game["players"][jugador]["roundPoints"]
 
                                 if turnoBot(baraja,mazo,puntos,rasgo):
                                     elemento0 = baraja[0]
 
-                                    settings_game["players"][jugador]["points"] += cartasES[elemento0]["realValue"]
+                                    settings_game["players"][jugador]["roundPoints"] += cartasES[elemento0]["realValue"]
 
                                     baraja.remove(elemento0)
                                 else:
                                     break
-                                print("Baraja len:",len(baraja),"- Puntos:",settings_game["players"][jugador]["points"])
+                                print("Baraja len:",len(baraja),"- Puntos:",settings_game["players"][jugador]["roundPoints"])
                                 input()
                         else:
                             print("uwu")
