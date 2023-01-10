@@ -404,9 +404,9 @@ def lis_dic(players_in_game):
         for j in players:
             if i == j[0]:
                 if j[3] == 1:
-                    dict_players[i]={"name":j[1],"human":True,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":0,"cards":[],"roundPoints":0}
+                    dict_players[i]={"name":j[1],"human":True,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":20,"cards":[],"roundPoints":0}
                 if j[3] == 0:
-                    dict_players[i]={"name":j[1],"human":False,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":0,"cards":[],"roundPoints":0}
+                    dict_players[i]={"name":j[1],"human":False,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":20,"cards":[],"roundPoints":0}
     return dict_players
 
 def setGamePlayers():
@@ -479,8 +479,8 @@ def burbujaPrioridad(lista):
     for i in range(len(lista)):
         for j in range(0, len(lista)-i-1):
 
-            numero1 = cartas[lista[j]]["value"]
-            numero2 = cartas[lista[j+1]]["value"]
+            numero1 = cartas[lista[j]]["realValue"]
+            numero2 = cartas[lista[j+1]]["realValue"]
 
             if numero1 < numero2:
                 lista[j], lista[j+1] = lista[j+1], lista[j]
@@ -560,21 +560,50 @@ def turnoBot(cartasEnBaraja,mazo, puntos, rasgo):
     if puntos == 0 or puntos == 0.5:
         return True
     else:
-        cartasNoPasarse = 0
         cartasPasarse = 0
         for carta in cartasEnBaraja:
-            valorCarta = mazo[carta]["realValue"]
+            valorCarta = mazo[carta]["value"]
             if puntos + valorCarta > 7.5:
                 cartasPasarse += 1
-            else:
-                cartasNoPasarse += 1
         
-        CartasPorSalir = len(cartasEnBaraja)
-        formula = (cartasPasarse/CartasPorSalir)*100
+        cartasPorSalir = len(cartasEnBaraja)
+        formula = (cartasPasarse/cartasPorSalir)*100
         if formula > rasgo:
             return False
         else:
             return True
+
+def autoPlayBot(baraja,mazo,rasgo,jugador):
+    while True:
+        roundPoints = settings_game["players"][jugador]["roundPoints"]
+
+        if turnoBot(baraja,mazo,roundPoints,rasgo):
+            elemento0 = baraja[0]
+
+            settings_game["players"][jugador]["roundPoints"] += cartasES[elemento0]["value"]
+
+            settings_game["players"][jugador]["cards"].append(elemento0)
+
+
+            baraja.remove(elemento0)
+        else:
+            break
+
+def autoPlayBanca(baraja,mazo,rasgo,jugador):
+    while True:
+        roundPoints = settings_game["players"][jugador]["roundPoints"]
+
+        if turnoBot(baraja,mazo,roundPoints,rasgo):
+            elemento0 = baraja[0]
+
+            settings_game["players"][jugador]["roundPoints"] += cartasES[elemento0]["value"]
+
+            settings_game["players"][jugador]["cards"].append(elemento0)
+
+
+            baraja.remove(elemento0)
+        else:
+            break
 
 def play():
     if settings_game["n_players"] < 2:
@@ -588,29 +617,29 @@ def play():
         
         for ronda in range(settings_game["n_rouds"]):
             baraja = returnBarajaMezclada(settings_game["deck"])
+
             for prioridadJugador in listaPrioridad:
+
                 for jugador in settings_game["players"]:
+
                     if settings_game["players"][jugador]["priority"] == prioridadJugador:
+
                         limpiarTerminal()
                         printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
                         if settings_game["players"][jugador]["human"] == False:
+                            if settings_game["players"][jugador]["bank"] == True:
+                                print("uwu")
+                            else:
 
-                            rasgo = settings_game["players"][jugador]["type"]
-                            while True:
-                                puntos = settings_game["players"][jugador]["roundPoints"]
+                                rasgo = settings_game["players"][jugador]["type"]
 
-                                if turnoBot(baraja,mazo,puntos,rasgo):
-                                    elemento0 = baraja[0]
-
-                                    settings_game["players"][jugador]["roundPoints"] += cartasES[elemento0]["realValue"]
-
-                                    baraja.remove(elemento0)
-                                else:
-                                    break
-                                print("Baraja len:",len(baraja),"- Puntos:",settings_game["players"][jugador]["roundPoints"])
-                                input()
+                                autoPlayBot(baraja,mazo,rasgo,jugador)
+                            
                         else:
-                            print("uwu")
+                            if settings_game["players"][jugador]["bank"] == True:
+                                print("uwu")
+                            else:
+                                print("uwu")
                         input()
                 
 
