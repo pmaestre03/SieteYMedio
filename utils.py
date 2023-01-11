@@ -275,11 +275,19 @@ def showPlayersAndRemove():
 #Settings functions
 def settings():
     global settings_game
-    cartas = ""
-    rondas = 5
+
+    try:
+        cartas = settings_game["deck"]
+    except:
+        cartas = cartasES
+
+    try:
+        rondas = settings_game["n_rouds"]
+    except:
+        rondas = 5
 
     limpiarTerminal()
-
+    
     while True:
         printSevenAndHalfTitle(" Configuración ")
         crearMenu(["Seleccionar Jugadores","Seleccionar Baraja de Cartas","Seleccionar Maximo Rondas (5 Rondas por Defecto)","Atras"],") ",empezarEnCero=False)
@@ -288,15 +296,17 @@ def settings():
 
         if opcion == "1":
             players =setGamePlayers()
+            settings_game["n_players"] = len(players)
+            settings_game["players"] = players
         elif opcion == "2":
             cartas = setCardsDeck()
+            settings_game["deck"] = cartas
         elif opcion == "3":
             rondas = setMaxRounds()
-            settings_game = {'n_players':len(players),'players':players,'n_rounds':rondas,'deck':cartas}
+            settings_game["n_rouds"] = rondas
         else:
-            if cartas == "":
-                    cartas = cartasES
-            settings_game={'n_players':len(players),'players':players,'n_rouds':rondas,'deck':cartas}
+            settings_game["deck"] = cartas
+            settings_game["n_rouds"] = rondas
             return
 
 def mostrarPlayers_settings(players_in_game_list=[]):
@@ -458,13 +468,14 @@ def setCardsDeck():
         crearMenu(["Baraja Española","Baraja de Poker","Atras"],") ",empezarEnCero=False)
         opcion = int(comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,3)))
         if opcion == 1:
-            Cards_Deck = 'spain'
-            return Cards_Deck
+            return cartasES
         if opcion == 2:
-            Cards_Deck = 'poker'
-            return Cards_Deck
+            return cartasPoker
         else:
-            break
+            try:
+                return settings_game["deck"]
+            except:
+                return cartasES
     
 def setMaxRounds():
     printSevenAndHalfTitle('')
