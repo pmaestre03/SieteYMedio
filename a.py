@@ -1,4 +1,5 @@
 from random import *
+from utils import *
 
 cartasES = {
     "O01": {"literal": "As de Oros", "value": 1, "priority": 4, "realValue": 1},
@@ -168,26 +169,23 @@ def returnBarajaMezclada(mazo):
     return baraja
 
 
-baraja = returnBarajaMezclada()
-puntos = 0
-rasgo = 50
-while True:
-    print("Baraja len:",len(baraja))
-    
 
-    if decisionBot(baraja,cartasES,puntos,rasgo):
-        elemento0 = baraja[0]
+def menuJuegoHumano():
+    crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",True)
 
-        puntos += cartasES[elemento0]["realValue"]
+    opcion = comprobarInput("Opcion: ",soloText=False,soloNum=True)
 
-        baraja.remove(elemento0)
-        print("Coge carta")
-    else:
-        print("No")
-        break
-
-    input()
-    print("Baraja len:",len(baraja),"- Puntos:",puntos)
-
-print("Finalita el turno")
+    if opcion == "1":
+        print("stats")
+    elif opcion == "2":
+        print("game stats")
+    elif opcion == "3":
+        print("bet")
+    elif opcion == "4":
+        print("order")
+    elif opcion == "5":
+        print("autoplay")
+    elif opcion == "6":
+        print("stand")
+menuJuegoHumano()
     
