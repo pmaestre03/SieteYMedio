@@ -188,3 +188,16 @@ def menuJuegoHumano():
     elif opcion == "6":
         print("stand")
     
+def uno_en_mesa(lista):
+    for i in players:
+        si = list(players[i].keys())
+    cadena = ''
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in lista:
+            cadena += str(players[j][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
+generarPrioridad()
+lista = ['11115555A']
+uno_en_mesa(lista)

@@ -434,7 +434,8 @@ def setGamePlayers():
             mostrarPlayers_settings(players_in_game_list=players_in_game)
 
             while True:
-                option = comprobarInput("Introduce el ID: ",soloText=False,permitirCaractEspeciales=True,excepciones=['-1'])
+                print("".ljust(6)+"Opciones: id para añadir a la partida, -id para eliminar de la partida, sh para mostrar los jugadores en partida, -1 para salir")
+                option = comprobarInput("> ",lJust=6,soloText=False,permitirCaractEspeciales=True,excepciones=['-1'])
                 if option[0]== '-' and option[1:] in players_in_game:
                     input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
                     players_in_game.remove(option[1:])
@@ -451,6 +452,8 @@ def setGamePlayers():
                     player_in_game(players_in_game=players_in_game)
                     selecion = False
                     break
+                elif option == "sh":
+                    player_in_game(players_in_game)
                 elif len(players_in_game) == 6:
                     player_in_game(players_in_game=players_in_game)
                     selecion = False
@@ -565,6 +568,17 @@ def mesa(lista):
             for i in players:
                 if j == players[i]['priority']:
                     cadena += str(players[i][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
+
+def uno_en_mesa(lista):
+    for i in players:
+        si = list(players[i].keys())
+    cadena = ''
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in lista:
+            cadena += str(players[j][h]).ljust(50)
         cadena+='\n'
     print(cadena)
 
