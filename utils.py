@@ -8,12 +8,13 @@ cur = conn.cursor()
 settings_game = {'n_players':0}
 
 #Recibe una lista y un bool y crea un menu en base a la lista
-def crearMenu(lista,separador,empezarEnCero = True):
+def crearMenu(lista,separador,empezarEnCero = True,lJust = 0):
     for i in range(len(lista)):
         if empezarEnCero:
-            print(str(i) + separador+ str(lista[i]))
+            cadena = str(i) + separador+ str(lista[i])
         else:
-            print(str(i+1) + separador + str(lista[i]))
+            cadena = str(i+1) + separador + str(lista[i])
+        print("".ljust(lJust)+cadena)
 
 #Recibe un texto a centrar, el numero al cual quiere centrar y, opcionalmente, un caracter para rellenar los laterales
 def crearTitulo(titulo,centroNumero,centroCaracter = False):
@@ -27,9 +28,9 @@ def limpiarTerminal():
     print("\n" * 100)
 
 #Nos permite controlar todos los parametros permitidos en un input (excepto textos con caracteres entre medio)
-def comprobarInput(textoInput,soloText = True, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False,excepciones=[]):
+def comprobarInput(textoInput,lJust=0,soloText = True, soloNum = False,tuplaRangoNumeros = (), letras_num = False, permitirCaractEspeciales = False,excepciones=[]):
     while True:
-        opcion = input(textoInput)
+        opcion = input("".ljust(lJust)+textoInput)
         if opcion in excepciones:
             return opcion
         if opcion.isspace() or opcion == "":
@@ -605,6 +606,24 @@ def autoPlayBanca(baraja,mazo,rasgo,jugador):
         else:
             break
 
+def menuJuegoHumano():
+    crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=59)
+
+    opcion = comprobarInput("Opcion: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
+
+    if opcion == "1":
+        print("stats")
+    elif opcion == "2":
+        print("game stats")
+    elif opcion == "3":
+        print("bet")
+    elif opcion == "4":
+        print("order")
+    elif opcion == "5":
+        print("autoplay")
+    elif opcion == "6":
+        print("stand")
+
 def play():
     if settings_game["n_players"] < 2:
         input("Debes al menos 2 jugadores en la partida para poder empezar\nPulsa enter para continuar")
@@ -637,9 +656,11 @@ def play():
                             
                         else:
                             if settings_game["players"][jugador]["bank"] == True:
-                                print("uwu")
+                                menuJuegoHumano()
+                                print(jugador)
                             else:
-                                print("uwu")
+                                menuJuegoHumano()
+                                print(jugador)
                         input()
                 
 

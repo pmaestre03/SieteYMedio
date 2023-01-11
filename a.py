@@ -171,9 +171,9 @@ def returnBarajaMezclada(mazo):
 
 
 def menuJuegoHumano():
-    crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",True)
+    crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=30)
 
-    opcion = comprobarInput("Opcion: ",soloText=False,soloNum=True)
+    opcion = comprobarInput("Opcion: ",lJust=30,soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
 
     if opcion == "1":
         print("stats")
@@ -187,5 +187,4 @@ def menuJuegoHumano():
         print("autoplay")
     elif opcion == "6":
         print("stand")
-menuJuegoHumano()
     
