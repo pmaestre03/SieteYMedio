@@ -45,13 +45,13 @@ cartasES = {
 
 cartas = cartasES
 players = {
-"11115555A":{"name":"Mario","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"11115555A":{"name":"Mario","human":True,"priority":1,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
 "roundPoints":0},
-"22225555A":{"name":"Pedro","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"22225555A":{"name":"Pedro","human":True,"priority":2,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
 "roundPoints":0},
-"22225554A":{"name":"jose","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"22225554A":{"name":"jose","human":True,"priority":3,"type":40,"bank":True,"bet":0,"points":0,"cards":[],"initialCard":"",
 "roundPoints":0},
-"22225553A":{"name":"marcos","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
+"22225553A":{"name":"marcos","human":True,"priority":4,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
 "roundPoints":0}
 }
 
@@ -108,6 +108,7 @@ def ordenar_prioridad():
                 lista[j] = lista[j + 1]
                 lista[j + 1] = numero
     return lista
+
 def mesa(lista):
     for i in players:
         si = list(players[i].keys())
@@ -131,7 +132,17 @@ def mesa(lista):
                     cadena += str(players[i][h]).ljust(50)
         cadena+='\n'
     print(cadena)
+def uno_en_mesa(lista):
+    for i in players:
+        si = list(players[i].keys())
+    cadena = ''
+    for h in si:
+        cadena += str(h).ljust(20).title()
+        for j in lista:
+            cadena += str(players[j][h]).ljust(50)
+        cadena+='\n'
+    print(cadena)
 generarPrioridad()
-lista = ordenar_prioridad()
-mesa(lista)
+lista = ['11115555A']
+uno_en_mesa(lista)
 
