@@ -63,6 +63,7 @@ def comprobarInput(textoInput,lJust=0,soloText = True, soloNum = False,tuplaRang
             else:
                 input("Error\nPulsa enter para continuar")
 
+#Imprime el titulo centrado 
 def printSevenAndHalfTitle(mensajeFinal):
     print("="*140+"\n"+
 "                 #####                                          #                         #     #                        \n"
@@ -74,6 +75,8 @@ def printSevenAndHalfTitle(mensajeFinal):
 "                  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
 mensajeFinal.center(140,"=")+"\n"
 )
+
+#Enseña los jugadores de la base de datos de la tabla human 
 def mostrarPlayers():
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -81,12 +84,13 @@ def mostrarPlayers():
     cadena = 'Select Players'.center(140,'*')+'\n'+'Boot Player'.center(69,' ')+'||'+'Player Player'.center(69,' ')+'\n'+'-'*140+'\n'+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(24)+"||".ljust(1)+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(25)+"\n"+"*"*140
     print(cadena)
 
+    #querys que acceden a la base de datos, con la cual obtenemos la informacion de la tabla de player
     queryHumanos = f"select * from player where human = 1"
     queryBot = f"select * from player where human = 0"
 
     cursorHumanos.execute(queryHumanos)
     cursorBots.execute(queryBot)
-
+    #bucle para controlar el formato del texto para mostrarlo en pantalla. Tenemos para todos los casos correspondientes
     while True:
         h = cursorHumanos.fetchone()
         b = cursorBots.fetchone()
@@ -106,6 +110,7 @@ def mostrarPlayers():
         print(cadena)
     print("*"*140)
 
+# mostramos en pantalla si tenemos un riesgo 
 def reisgoEnTexto(riesgo):
                 if riesgo == 30:
                     return "Prudente"
@@ -115,7 +120,7 @@ def reisgoEnTexto(riesgo):
                     return "Atrevido"
                 else:
                     return str(riesgo)
-
+#hace un dni random 
 def newRandomDNI():
     while True:
         dniNumero = randint(11111111,99999999)
@@ -124,7 +129,7 @@ def newRandomDNI():
 
         if checkExistenceDNI(dni):
             return dni
-
+#comprueba si el dni esta incluido en nuestra base de datos
 def checkExistenceDNI(dni):
     query = f"select * from player where dni = '{dni}'"
     cur.execute(query)
@@ -132,7 +137,8 @@ def checkExistenceDNI(dni):
         return False
     else:
         return True
-
+    
+#comprueba si el nombre ya existe en la base de datos
 def checkExistenceName(name):
     query = f"select * from player where name = '{name}'"
     cur.execute(query)
@@ -142,6 +148,7 @@ def checkExistenceName(name):
     else:
         return False
 
+#mezlca la baraja y devuelve una baraja ya mezclada
 def returnBarajaMezclada(mazo):
     baraja = []
     for i in mazo:
@@ -151,7 +158,7 @@ def returnBarajaMezclada(mazo):
     return baraja
 
 
-#Players conf functions
+#Configuracion de los players (menu)
 def playersConf():
     while True:
         limpiarTerminal()
@@ -169,7 +176,7 @@ def playersConf():
             showPlayersAndRemove()
         else:
             break
-
+#creamos un nuevo usuario y lo añadimos a la base de datos 
 def newPlayer(esBot=False):
 
     limpiarTerminal()
@@ -207,7 +214,7 @@ def newPlayer(esBot=False):
         input("Jugador creado correctamente\nPulsa enter para continuar")
 
 
-
+#comparamos si el dni es correcto y si es incorrecto mandamos mensajes correspondientes 
 def comp_dni(textoInput):
     lista = ['T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E']
     try:
@@ -229,6 +236,7 @@ def comp_dni(textoInput):
         print(e)
         return comp_dni("Introduce tu dni: ")
 
+# Menu de seleccion de riesgo 
 def selectLevelRisc():
     cadena = 'Escoge un nivel de riesgo\n1) Atrevido \n2) Normal\n3) Prudente\n'
     print(cadena)
@@ -240,6 +248,7 @@ def selectLevelRisc():
     if opc == "3":
         return 30
 
+#comprobacion de los datos de dni nombre y riesgo 
 def comprobacion_fin(dni,name,level_risc):
     if level_risc == 30:
         level_risc = "Prudente"
@@ -254,7 +263,7 @@ def comprobacion_fin(dni,name,level_risc):
         return True
     else:
         return False
-
+#improme los usuarios y deja seleccionar que id de usuario queremos eliminar 
 def showPlayersAndRemove():
     while True:
         limpiarTerminal()
@@ -272,7 +281,7 @@ def showPlayersAndRemove():
             input("Pon un ID valido y en formato correcto\nPulsa enter para continuar")
 
     
-#Settings functions
+#Settings functions Menu de configuracion del juego 
 def settings():
     global settings_game
 
@@ -309,6 +318,7 @@ def settings():
             settings_game["n_rouds"] = rondas
             return
 
+#Informacion de los jugadores 
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -359,6 +369,7 @@ def mostrarPlayers_settings(players_in_game_list=[]):
         print(cadena1)
     print("*"*140)
 
+#lista de los jugadores 
 def lis_dic(players_in_game):
     query = f"select * from player"
     cur.execute(query)
@@ -372,7 +383,8 @@ def lis_dic(players_in_game):
                 if j[3] == 0:
                     dict_players[i]={"name":j[1],"human":False,"priority":0,"type":j[2],"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"","roundPoints":0}
     return dict_players
-    
+
+# funcion si dice si tenemos jugadores o no 
 def player_in_game(players_in_game=[]):
     query = f"select * from player"
     cur.execute(query)
@@ -420,6 +432,7 @@ def lis_dic(players_in_game):
                     dict_players[i]={"name":j[1],"human":False,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":20,"cards":[],"roundPoints":0}
     return dict_players
 
+# funcion que selecciona el jugador 
 def setGamePlayers():
         selecion = True
         limpiarTerminal()
@@ -464,7 +477,7 @@ def setGamePlayers():
             limpiarTerminal()
         return lis_dic(players_in_game)
 
-
+# funcion para seleccionar la baraja correspondiente a la que quieres jugar 
 def setCardsDeck():
     while True:
         printSevenAndHalfTitle(' Selecciona la Baraja ')
@@ -479,7 +492,7 @@ def setCardsDeck():
                 return settings_game["deck"]
             except:
                 return cartasES
-    
+# funcion para seleeccionar el numero de rondas que va a tener el propio juego 
 def setMaxRounds():
     printSevenAndHalfTitle('')
     while True:
@@ -487,7 +500,9 @@ def setMaxRounds():
         option = comprobarInput("Seguro que quieres que sean {} rondas? S/n\n> ".format(rounds),letras_num=True)
         if option.lower() == 's':
             return rounds
-#Play Functions
+
+# ordena las cartass para poder crear una prioridad en la baraja 
+#Play Functions 
 def burbujaPrioridad(lista):
     cartas = settings_game['deck']
 
@@ -507,7 +522,7 @@ def burbujaPrioridad(lista):
                 if numero1 < numero2:
                     lista[j], lista[j+1] = lista[j+1], lista[j]
 
-def generarPrioridad():
+# utiliza la funcion burbujaPrioridad para poder dar una carta a cada jugador y saber la prioridad de cada uno 
     players = settings_game["players"]
 
     player_in_game = list(players.keys())
@@ -522,7 +537,8 @@ def generarPrioridad():
         cartasIniciales.append(mazo[i])
 
     burbujaPrioridad(cartasIniciales)
-
+#el que tiene la prioridad mas alta pasa a ser la banca 
+def generarPrioridad():
     for i in range(len(player_in_game)):
         jugadorActual = player_in_game[i]
         cartaInicalJugador = players[jugadorActual]["initialCard"]
@@ -532,6 +548,7 @@ def generarPrioridad():
 
 #settings_game = {'n_players':len(players),'players':players,'n_rounds':rondas,'deck':cartas}
 
+#ordena la prioridad en los jugadores 
 def ordenar_prioridad():
     lista = []
     for i in settings_game["players"]:
@@ -545,6 +562,7 @@ def ordenar_prioridad():
                 lista[j + 1] = numero
     return lista
 
+# imprime la 'mesa' la informacion de los jugadores 
 def mesa(lista):
     players = settings_game["players"]
 
@@ -571,6 +589,7 @@ def mesa(lista):
         cadena+='\n'
     print(cadena)
 
+# mostramos el jugador correspondiente 
 def uno_en_mesa(lista):
     for i in players:
         si = list(players[i].keys())
@@ -582,6 +601,7 @@ def uno_en_mesa(lista):
         cadena+='\n'
     print(cadena)
 
+# tomar las decisiones del bot 
 def turnoBot(cartasEnBaraja,mazo, puntos, rasgo):
     if puntos == 0 or puntos == 0.5:
         return True
@@ -599,6 +619,7 @@ def turnoBot(cartasEnBaraja,mazo, puntos, rasgo):
         else:
             return True
 
+# usa la funcion turno bot para robar carta de la baraja del bot 
 def autoPlayBot(baraja,mazo,rasgo,jugador):
     while True:
         roundPoints = settings_game["players"][jugador]["roundPoints"]
@@ -631,6 +652,7 @@ def autoPlayBanca(baraja,mazo,rasgo,jugador):
         else:
             break
 
+# funcion que muestra la informacion del menu de los jugadores a la hora de jugar 
 def menuJuegoHumano():
     crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=59)
 
@@ -648,7 +670,7 @@ def menuJuegoHumano():
         print("autoplay")
     elif opcion == "6":
         print("stand")
-
+# juego 
 def play():
     if settings_game["n_players"] < 2:
         input("Debes al menos 2 jugadores en la partida para poder empezar\nPulsa enter para continuar")
