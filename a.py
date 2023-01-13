@@ -46,15 +46,77 @@ cartasES = {
 
 cartas = cartasES
 players = {
-"11115555A":{"name":"Mario","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
-"roundPoints":0},
-"22225555A":{"name":"Pedro","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
-"roundPoints":0},
-"22225554A":{"name":"jose","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
-"roundPoints":0},
-"22225553A":{"name":"marcos","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":0,"cards":[],"initialCard":"",
-"roundPoints":0}
+"11115555A":{"name":"Mario","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":20,"cards":[],"initialCard":"","roundPoints":0},
+"22225555A":{"name":"Pedro","human":True,"priority":0,"type":30,"bank":False,"bet":0,"points":20,"cards":[],"initialCard":"","roundPoints":0},
+"22225554A":{"name":"jose","human":True,"priority":0,"type":50,"bank":False,"bet":0,"points":20,"cards":[],"initialCard":"","roundPoints":0},
+"22225553A":{"name":"marcos","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":20,"cards":[],"initialCard":"","roundPoints":0}
 }
+def listarPuntosJugadores(dicPlayers):
+    listaPuntosJugadores = []
+    for i in dicPlayers:
+        listaPuntosJugadores.append(dicPlayers[i]["roundPoints"])
+    return listaPuntosJugadores
+def listarApuestasJugadores(dicPlayers):
+    listaApuestaJugadores = []
+    for i in dicPlayers:
+        listaApuestaJugadores.append(dicPlayers[i]["bet"])
+    return listaApuestaJugadores
+def sumarApuestasJugadores(dicPlayers):
+    sumaApuestaJugadores = 0
+    for i in dicPlayers:
+        sumaApuestaJugadores += dicPlayers[i]["bet"]
+    return sumaApuestaJugadores
+
+def pedirSegunRasgo(cartasEnBaraja,mazo,rasgo, roundPoints):
+    cartasPasarse = 0
+    for carta in cartasEnBaraja:
+        valorCarta = mazo[carta]["realValue"]
+        if roundPoints + valorCarta > 7.5:
+            cartasPasarse += 1
+    
+    cartasPorSalir = len(cartasEnBaraja)
+    formula = (cartasPasarse/cartasPorSalir)*100
+    if formula > rasgo:
+        return False
+    else:
+        return True
+
+def decisionBancaPedir(cartasEnBaraja,mazo,roundPoints,rasgo,puntos):
+    listaPuntosJugadores = listarPuntosJugadores(players)
+    listaApuestaJugadores = listarApuestasJugadores(players)
+    sumaPuntosApostados = sumarApuestasJugadores(players)
+
+    if roundPoints == 7.5:
+        return False
+    elif roundPoints < 7.5:
+        
+        totalPuntosRepartir = 0
+
+        for i in range(len(listaPuntosJugadores)-1):
+            if roundPoints < listaPuntosJugadores[i]:
+                totalPuntosRepartir += listaApuestaJugadores[i]
+
+        #Porque eso significa que ha ganado a todos los players
+        if totalPuntosRepartir == 0:
+            return False
+
+        #Esto significa que no supera a ningun jugador
+        elif sumaPuntosApostados == totalPuntosRepartir:
+            return True
+
+        #Esto significa si despues de repartir los puntos se queda sin
+        elif totalPuntosRepartir >= puntos:
+            return True
+
+        #Esto significa si despues de repartir los puntos aun tiene
+        elif totalPuntosRepartir < puntos:
+            return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
+
+    elif roundPoints == 0 or roundPoints == 0.5:
+        return True
+    else:
+        return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
+
 
 def burbujaPrioridad(lista):
 
