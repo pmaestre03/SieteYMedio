@@ -333,23 +333,26 @@ def mostrarPlayers_settings(players_in_game_list=[]):
         cadena1 = ''
         if len(l_b)>0:
             while True:
+                print(l_b[0][0])
                 if l_b[0][0] not in players_in_game_list:
                     cadena1 += l_b[0][0].ljust(19) + " " + l_b[0][1].ljust(24) + " " + reisgoEnTexto(l_b[0][2]).ljust(24) + "||".ljust(1)
                     break
                 else:
-                    l_b = l_b[1:]
+                    break           
         if len(l_h)>0:
             while True:
                 if l_h[0][0] not in players_in_game_list:
                     cadena1 += l_h[0][0].ljust(19) + " " + l_h[0][1].ljust(24) + " " + reisgoEnTexto(l_h[0][2]).ljust(25)
                     break
                 else:
-                    l_h = l_h[1:]
+                    break
         l_b, l_h = l_b[1:], l_h[1:]
+        print(l_b,l_h)
+
         print(cadena1)
         if len(l_h)== 0 and len(l_b) == 0:
             break
-    print(cadena1)
+    print('a')
     print("*" * 140)
 
 def lis_dic(players_in_game):
