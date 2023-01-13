@@ -494,12 +494,14 @@ def ranking():
             break
 
 def showPlayersWithMoreEarning():
-    var = list(cur.fetchall())
-
+    query = f"select * from scores"
+    cur.execute(query)
+    scores = cur.fetchall()
+    var = list(scores)
     for pasadas in range(len(var)-1):
-        for comp in range(len(var)-1-pasadas):
-            if var[comp][2] < var[comp+1][2]:
-                var[comp],var[comp+1] = var[comp+1],var[comp]
+            for comp in range(len(var)-1-pasadas):
+                if var[comp][2] < var[comp+1][2]:
+                    var[comp],var[comp+1] = var[comp+1],var[comp]
     for i in var:
         listaOrd = f'{i}'
         print(listaOrd)
@@ -518,14 +520,18 @@ def showPlayersWithMoreGamesPlayed():
     print("PWMGP")
 
 def showPlayersWithMoreMinutesPlayed():
-    var = list(cur.fetchall())
+    query = f"select * from scores"
+    cur.execute(query)
+    scores = cur.fetchall()
+    var = list(scores)
     for pasadas in range(len(var)-1):
-        for comp in range(len(var)-1-pasadas):
-            if var[comp][4] < var[comp+1][4]:
-                var[comp],var[comp+1] = var[comp+1],var[comp]
+            for comp in range(len(var)-1-pasadas):
+                if var[comp][4] < var[comp+1][4]:
+                    var[comp],var[comp+1] = var[comp+1],var[comp]
     for i in var:
         listaOrd = f'{i}'
         print(listaOrd)
+    input()
     print("PWMMP")
 
 #Reports Functions
