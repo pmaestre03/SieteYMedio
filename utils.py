@@ -2,7 +2,7 @@ from random import *
 import pymysql
 from variables import *
 
-conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
+conn = pymysql.connect(host="51.145.227.94", user="pnaharro", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
 
 
@@ -418,7 +418,7 @@ def setCardsDeck():
         crearMenu(["Baraja Española","Baraja de Poker","Atras"],") ",empezarEnCero=False)
         opcion = int(comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,3)))
         if opcion == 1:
-            Cards_Deck = 'spain'
+            Cards_Deck = 'cartasES'
             return Cards_Deck
         if opcion == 2:
             Cards_Deck = 'poker'
