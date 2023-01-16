@@ -351,7 +351,7 @@ def mostrarPlayers_settings(players_in_game_list=[]):
                 else:
                     l_h = l_h[1:]
         l_b, l_h = l_b[1:], l_h[1:]
-
+        
         print(cadena1)
         if len(l_h)== 0 and len(l_b) == 0:
             break
