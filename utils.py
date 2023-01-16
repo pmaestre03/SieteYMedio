@@ -347,12 +347,9 @@ def mostrarPlayers_settings(players_in_game_list=[]):
                 else:
                     break
         l_b, l_h = l_b[1:], l_h[1:]
-        print(l_b,l_h)
-
         print(cadena1)
         if len(l_h)== 0 and len(l_b) == 0:
             break
-    print('a')
     print("*" * 140)
 
 def lis_dic(players_in_game):
