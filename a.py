@@ -51,6 +51,12 @@ players = {
 "22225554A":{"name":"jose","human":True,"priority":0,"type":50,"bank":False,"bet":0,"points":20,"cards":[],"initialCard":"","roundPoints":0},
 "22225553A":{"name":"marcos","human":True,"priority":0,"type":40,"bank":False,"bet":0,"points":20,"cards":[],"initialCard":"","roundPoints":0}
 }
+def apostarPuntosBot(player,rasgo,puntos):
+    if players[player]["bet"] != 0:
+        apuesta = puntos * (rasgo/100)
+        players[player]["bet"] = apuesta
+    
+
 def listarPuntosJugadores(dicPlayers):
     listaPuntosJugadores = []
     for i in dicPlayers:

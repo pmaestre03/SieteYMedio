@@ -11,7 +11,7 @@ query = f"select * from ave23ntura"
 cur.execute(query)
 variable = cur.fetchall()
 '''
-2
+
 while True:
     limpiarTerminal()
     printSevenAndHalfTitle("")

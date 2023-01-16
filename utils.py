@@ -308,7 +308,7 @@ def settings():
             settings_game["deck"] = cartas
             settings_game["n_rouds"] = rondas
             return
-
+############################################################################################
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -320,41 +320,43 @@ def mostrarPlayers_settings(players_in_game_list=[]):
 
     queryHumanos = f"select * from player where human = 1"
     queryBot = f"select * from player where human = 0"
+
     l_h,l_b = [],[]
+
     human = cursorHumanos.execute(queryHumanos)
     bot = cursorBots.execute(queryBot)
+
     for i in range(int(human)):
         h = cursorHumanos.fetchone()
         l_h.append(h)
     for i in range(int(bot)):
         b = cursorBots.fetchone()
         l_b.append(b)
+
     while True:
         cadena1 = ''
         if len(l_b)>0:
             while True:
-                print(l_b[0][0])
                 if l_b[0][0] not in players_in_game_list:
                     cadena1 += l_b[0][0].ljust(19) + " " + l_b[0][1].ljust(24) + " " + reisgoEnTexto(l_b[0][2]).ljust(24) + "||".ljust(1)
                     break
                 else:
-                    break           
+                    #cadena1 += "".ljust(69) + "||".ljust(1)
+                    l_b = l_b[1:]
         if len(l_h)>0:
             while True:
                 if l_h[0][0] not in players_in_game_list:
                     cadena1 += l_h[0][0].ljust(19) + " " + l_h[0][1].ljust(24) + " " + reisgoEnTexto(l_h[0][2]).ljust(25)
                     break
                 else:
-                    break
+                    l_h = l_h[1:]
         l_b, l_h = l_b[1:], l_h[1:]
-        print(l_b,l_h)
 
         print(cadena1)
         if len(l_h)== 0 and len(l_b) == 0:
             break
-    print('a')
     print("*" * 140)
-
+############################################################################################
 def lis_dic(players_in_game):
     query = f"select * from player"
     cur.execute(query)
@@ -549,24 +551,34 @@ def mesa(lista):
     for i in players:
         si = list(players[i].keys())
     cadena = ''
-    for h in si:
-        cadena += str(h).ljust(20).title()
-        for j in range(3):
-            for i in players:
-                if lista[j] == players[i]['priority']:
-                    cadena += str(players[i][h]).ljust(50)
-        cadena+='\n'
-    print(cadena)
-    print('-'*140)
-    cadena = ''
-    lista=lista[3:]
-    for h in si:
-        cadena += str(h).ljust(20).title()
-        for j in lista:
-            for i in players:
-                if j == players[i]['priority']:
-                    cadena += str(players[i][h]).ljust(50)
-        cadena+='\n'
+    if len(lista) >= 3:
+        for h in si:
+            cadena += str(h).ljust(20).title()
+            for j in range(3):
+                for i in players:
+                    if lista[j] == players[i]['priority']:
+                        cadena += str(players[i][h]).ljust(50)
+            cadena+='\n'
+        print(cadena)
+        if len(lista) >= 4:
+            print('-'*140)
+            cadena = ''
+            lista=lista[3:]
+            for h in si:
+                cadena += str(h).ljust(20).title()
+                for j in lista:
+                    for i in players:
+                        if j == players[i]['priority']:
+                            cadena += str(players[i][h]).ljust(50)
+                cadena+='\n'
+    else:
+        for h in si:
+            cadena += str(h).ljust(20).title()
+            for j in lista:
+                for i in players:
+                    if j == players[i]['priority']:
+                        cadena += str(players[i][h]).ljust(50)
+            cadena+='\n'
     print(cadena)
 
 def uno_en_mesa(lista,players):
@@ -599,6 +611,12 @@ def turnoBot(cartasEnBaraja,mazo,puntos,rasgo):
         return True
     else:
         return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,puntos)
+
+def apostarPuntosBot(players,player,rasgo,puntos):
+    if players[player]["bet"] == 0:
+        apuesta = puntos * (rasgo/100)
+        players[player]["bet"] = int(apuesta)
+    return players
 
 def autoPlayBot(baraja,mazo,rasgo,jugador):
     while True:
@@ -669,20 +687,20 @@ def decisionBancaPedir(cartasEnBaraja,mazo,roundPoints,rasgo,puntos,players):
 
 
 def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
-    print(len(baraja))
-    input()
-    print(mazo)
-    input()
-    print(rasgo)
-    input()
-    print(jugador)
-    input()
-    print(roundPoints)
-    input()
-    print(puntos)
-    input()
-    print(players)
-    input()
+    #print(len(baraja))
+    #input()
+    #print(mazo)
+    #input()
+    #print(rasgo)
+    #input()
+    #print(jugador)
+    #input()
+    #print(roundPoints)
+    #input()
+    #print(puntos)
+    #input()
+    #print(players)
+    #input()
     while True:
         roundPoints = settings_game["players"][jugador]["roundPoints"]
 
@@ -745,17 +763,17 @@ def play():
                             if settings_game["players"][jugador]["bank"] == True:
                                 autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
                             else:
-
+                                players = apostarPuntosBot(players,jugador,rasgo,puntos)
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
                             
                         else:
                             if settings_game["players"][jugador]["bank"] == True:
                                 menuJuegoHumano()
-                                print(jugador)
+
                             else:
                                 menuJuegoHumano()
-                                print(jugador)
-                        uno_en_mesa([jugador],players)
+                        mesa(listaPrioridad)
+                        #uno_en_mesa([jugador],players)
                         input()
         #no te olvides de resetear el diccionario
 
