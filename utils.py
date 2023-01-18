@@ -1,7 +1,7 @@
 from random import *
 import pymysql
 
-conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
+conn = pymysql.connect(host="51.145.227.94", user="pmaestre", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
 
 
@@ -509,7 +509,10 @@ def showPlayersWithMoreEarning():
     print("PWME")
 
 def showPlayersWithMoreGamesPlayed():
-    var = list(cur.fetchall())
+    query = f"select * from scores"
+    cur.execute(query)
+    scores = cur.fetchall()
+    var = list(scores)
     for pasadas in range(len(var)-1):
         for comp in range(len(var)-1-pasadas):
             if var[comp][3] < var[comp+1][3]:
@@ -539,17 +542,94 @@ def reports():
     limpiarTerminal()
     while True:
         printSevenAndHalfTitle(" Reportes ")
-        crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
+        crearMenu(["Initial card more repeated by each user, only users who have played a minimum of 3 games.","Player who makes the highest bet per game, find the round with the highest bet."
+        ,"Player who makes the lowest bet per game.","Percentage of rounds won per player in each game (%), as well as their average bet for the game.",
+        "List of games won by Bots.","Rounds won by the bank in each game.","Number of users have been the bank in each game.","Average bet per game.",
+        "Average bet of the first round of each game.","Average bet of the last round of each game.","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
-        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
-
-        if opcion == "1":
-            print("nada")
-        elif opcion == "8":
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,11))
+        if opcion == "1" or opcion == "4" or opcion == "6":
+            print("Not implemented")
+            input()
+        if opcion == "2":
+            rep_prop2()
+        if opcion == "3":
+            rep_prop3()
+        if opcion == "5":
+            rep_prop5()
+        if opcion == "7":
+            rep_prop7()
+        if opcion == "8":
+            rep_prop8()
+        if opcion == "9":
+            rep_prop9()
+        if opcion == "10":
+            rep_prop10()
+        elif opcion == "11":
             break
 
+def rep_prop2():
+    prop2 = conn.cursor()
+    queryprop2 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select max(r.points_bet) from round)"
+    prop2.execute(queryprop2)
+    propuesta2 = list(prop2.fetchall())
+    print(propuesta2)
+    input()
+    return
 
+def rep_prop3():
+    prop3 = conn.cursor()
+    queryprop3 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select min(r.points_bet)from round);"
+    prop3.execute(queryprop3)
+    propuesta3 = list(prop3.fetchall())
+    print(propuesta3)
+    input()
+    return
+
+def rep_prop5():
+    prop5 = conn.cursor()
+    queryprop5 = f"select w.id_game,w.points from winners w inner join player p on w.dni = p.dni where p.human = 0;"
+    prop5.execute(queryprop5)
+    propuesta5 = list(prop5.fetchall())
+    print(propuesta5)
+    input()
+    return
+
+def rep_prop7():
+    prop7 = conn.cursor()
+    queryprop7 = f"select g.id_game,count(distinct dni) as banca from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where r.bank = 1 group by g.id_game;"
+    prop7.execute(queryprop7)
+    propuesta7 = list(prop7.fetchall())
+    print(propuesta7)
+    input()
+    return
+
+def rep_prop8():
+    prop8 = conn.cursor()
+    queryprop8 = f"select g.id_game,avg(r.points_bet) as media_puntos_partida from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round group by rg.id_game;"
+    prop8.execute(queryprop8)
+    propuesta8 = list(prop8.fetchall())
+    print(propuesta8)
+    input()
+    return
+
+def rep_prop9():
+    prop9 = conn.cursor()
+    queryprop9 = f"select g.id_game,avg(r.points_bet) as media from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where rg.id_round = 1 group by rg.id_round_games;"
+    prop9.execute(queryprop9)
+    propuesta9 = list(prop9.fetchall())
+    print(propuesta9)
+    input()
+    return
+
+def rep_prop10():
+    prop10 = conn.cursor()
+    queryprop10 = f"select g.id_game,avg(r.points_bet) as media_ultima_ronda from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where rg.id_round = (select max(rg.id_round) from round_games) group by rg.id_round_games;"
+    prop10.execute(queryprop10)
+    propuesta10 = list(prop10.fetchall())
+    print(propuesta10)
+    input()
+    return
 ###############################################################################################################
 #Variables
 
