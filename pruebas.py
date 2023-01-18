@@ -45,7 +45,7 @@ def repartir_puntos(players):
             if player[i] != player[bank[0]]: 
                 if (players[i]['points'] - players[i]['bet']) <=0:
                     players[i]['points'] = 0
-                    players[bank[0]]['points']+= players[i]['bet']
+                    players[bank[0]]['points']+= players[i]['points']
                 else:
                     players[i]['points'] -= players[i]['bet']
                     players[bank[0]]['points']+= players[i]['bet']
@@ -75,7 +75,15 @@ def repartir_puntos(players):
         player[i]['roundPoints'] = 0
         player[i]['cards'] = []
         player[i]['bet'] = 0
+    deletes= []
     for i in player:
-        print(player[i])
-               
-repartir_puntos(player)
+        if player[i]['points'] == 0:
+            deletes.append(i)
+    for i in deletes:
+        player.pop(i)
+   
+    return players
+
+player = repartir_puntos(player)
+for i in player:
+        print(i,player[i]) 
