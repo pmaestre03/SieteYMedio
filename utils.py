@@ -308,7 +308,7 @@ def settings():
             settings_game["deck"] = cartas
             settings_game["n_rouds"] = rondas
             return
-############################################################################################
+
 def mostrarPlayers_settings(players_in_game_list=[]):
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -335,6 +335,7 @@ def mostrarPlayers_settings(players_in_game_list=[]):
 
     while True:
         cadena1 = ''
+
         if len(l_b)>0:
             while True:
                 if l_b[0][0] not in players_in_game_list:
@@ -342,21 +343,35 @@ def mostrarPlayers_settings(players_in_game_list=[]):
                     break
                 else:
                     #cadena1 += "".ljust(69) + "||".ljust(1)
-                    l_b = l_b[1:]
+                    try:
+                        if len(l_b) > 1:
+                            l_b = l_b[1:]
+                        else:
+                            raise
+                    except:
+                        cadena1 += "".ljust(69) + "||".ljust(1)
+                        break
         if len(l_h)>0:
             while True:
                 if l_h[0][0] not in players_in_game_list:
                     cadena1 += l_h[0][0].ljust(19) + " " + l_h[0][1].ljust(24) + " " + reisgoEnTexto(l_h[0][2]).ljust(25)
                     break
                 else:
-                    l_h = l_h[1:]
-        l_b, l_h = l_b[1:], l_h[1:]
-        
+                    try:
+                        if len(l_h) > 1:
+                            l_h = l_h[1:]
+                        else:
+                            raise
+                    except:
+                        break
+                    
+        l_b,l_h = l_b[1:],l_h[1:]
+
         print(cadena1)
         if len(l_h)== 0 and len(l_b) == 0:
             break
     print("*" * 140)
-############################################################################################
+
 def lis_dic(players_in_game):
     query = f"select * from player"
     cur.execute(query)
