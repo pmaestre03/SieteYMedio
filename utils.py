@@ -765,27 +765,32 @@ def repartir_puntos(players):
                     numero = lista[j]
                     lista[j] = lista[j + 1]
                     lista[j + 1] = numero
-    for i in players:
-        if players[i]['roundPoints'] == 7.5 and players[i]["bank"] == False:
-            siete_medio.append(i)
-    if len(siete_medio) >= 1:
-        if len(siete_medio) == 1:
-            players[siete_medio[0]]['bank'] = True
-            players[bank[0]]['bank'] = False
-        else:
-            lista = []
-            for i in siete_medio:
-                lista.append(players[i]['priority'])
-            for i in range(len(lista) - 1):
-                for j in range(len(lista) - i - 1):
-                    if lista[j] < lista[j + 1]:
-                        numero = lista[j]
-                        lista[j] = lista[j + 1]
-                        lista[j + 1] = numero
-            for i in players:
+        for i in players:
                 if players[i]['priority'] == lista[0]:
                     players[i]['bank'] = True
                     players[bank[0]]['bank'] = False
+    else:
+        for i in players:
+            if players[i]['roundPoints'] == 7.5 and players[i]["bank"] == False:
+                siete_medio.append(i)
+        if len(siete_medio) >= 1:
+            if len(siete_medio) == 1:
+                players[siete_medio[0]]['bank'] = True
+                players[bank[0]]['bank'] = False
+            else:
+                lista = []
+                for i in siete_medio:
+                    lista.append(players[i]['priority'])
+                for i in range(len(lista) - 1):
+                    for j in range(len(lista) - i - 1):
+                        if lista[j] < lista[j + 1]:
+                            numero = lista[j]
+                            lista[j] = lista[j + 1]
+                            lista[j + 1] = numero
+                for i in players:
+                    if players[i]['priority'] == lista[0]:
+                        players[i]['bank'] = True
+                        players[bank[0]]['bank'] = False
     for i in players:
         players[i]['roundPoints'] = 0
         players[i]['cards'] = []
