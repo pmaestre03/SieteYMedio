@@ -561,6 +561,24 @@ def ordenar_prioridad():
                 lista[j + 1] = numero
     return lista
 
+def ordenar_prioridad_inGame():
+    lista = []
+    for i in settings_game["players"]:
+        if settings_game["players"][i]["bank"] == False:
+            lista.append(settings_game["players"][i]['priority'])
+
+    for i in range(len(lista) - 1):
+        for j in range(len(lista) - i - 1):
+            if lista[j] > lista[j + 1]:
+                numero = lista[j]
+                lista[j] = lista[j + 1]
+                lista[j + 1] = numero
+            
+    for i in settings_game["players"]:
+        if settings_game["players"][i]["bank"] == True:
+            lista.append(settings_game["players"][i]['priority'])
+    return lista
+
 def mesa(lista):
     players = settings_game["players"]
 
@@ -630,8 +648,11 @@ def turnoBot(cartasEnBaraja,mazo,puntos,rasgo):
 
 def apostarPuntosBot(players,player,rasgo,puntos):
     if players[player]["bet"] == 0:
-        apuesta = puntos * (rasgo/100)
-        players[player]["bet"] = int(apuesta)
+        if players[player]["points"] == 1:
+            players[player]["bet"] = 1
+        else:
+            apuesta = puntos * (rasgo/100)
+            players[player]["bet"] = int(apuesta)
     return players
 
 def autoPlayBot(baraja,mazo,rasgo,jugador):
@@ -687,26 +708,18 @@ def decisionBancaPedir(cartasEnBaraja,mazo,roundPoints,rasgo,puntos,players):
 
         #Porque eso significa que ha ganado a todos los players
         if totalPuntosRepartir == 0:
-            print("totalPuntosRepartir == 0")
-            input()
             return False
 
         #Esto significa que no supera a ningun jugador
         elif sumaPuntosApostados == totalPuntosRepartir:
-            print("sumaPuntosApostados == totalPuntosRepartir")
-            input()
             return True
 
         #Esto significa si despues de repartir los puntos se queda sin
         elif totalPuntosRepartir >= puntos:
-            print("totalPuntosRepartir >= puntos:")
-            input()
             return True
 
         #Esto significa si despues de repartir los puntos aun tiene
         elif totalPuntosRepartir < puntos:
-            print("totalPuntosRepartir < puntos")
-            input()
             return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
     else:
         return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
@@ -754,10 +767,10 @@ def repartir_puntos(players):
                     players[i]['points'] -= players[i]['bet']
                     players[bank[0]]['points']+= players[i]['bet']
     siete_medio = []
-    if players[bank[0]]["points"] <= 0:
+    if players[bank[0]]['points'] <= 0:
         lista = []
         for i in players:
-            if i != players[bank[0]]:
+            if i != bank[0]:
                 lista.append(players[i]['priority'])
         for i in range(len(lista) - 1):
             for j in range(len(lista) - i - 1):
@@ -766,9 +779,9 @@ def repartir_puntos(players):
                     lista[j] = lista[j + 1]
                     lista[j + 1] = numero
         for i in players:
-                if players[i]['priority'] == lista[0]:
-                    players[i]['bank'] = True
-                    players[bank[0]]['bank'] = False
+            if players[i]['priority'] == lista[0]:
+                players[i]['bank'] = True
+                players[bank[0]]['bank'] = False
     else:
         for i in players:
             if players[i]['roundPoints'] == 7.5 and players[i]["bank"] == False:
@@ -865,8 +878,6 @@ def play():
 
                         if players[jugador]["human"] == False:
                             if players[jugador]["bank"] == True:
-                                print("xd")
-                                input()
                                 players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
 
                             else:
@@ -884,6 +895,9 @@ def play():
                         input()
         #no te olvides de resetear el diccionario
             players = repartir_puntos(players)
+            listaPrioridad = ordenar_prioridad_inGame()
+            print(listaPrioridad)
+            input()
 
 #Ranking functions
 def ranking():
