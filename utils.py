@@ -440,6 +440,7 @@ def setGamePlayers():
         players_in_game=[]
         player_in_game(players_in_game)
         
+        
         limpiarTerminal()
         printSevenAndHalfTitle(' Selecciona un Jugador o Bot para Agregar a la Partida ')
 
@@ -453,7 +454,10 @@ def setGamePlayers():
                     input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
                     players_in_game.remove(option[1:])
                     break
-
+                if len(players_in_game) == 6:
+                    player_in_game(players_in_game=players_in_game)
+                    selecion = False
+                    break
                 elif not checkExistenceDNI(option):
                     if not option in players_in_game:
                         players_in_game.append(option)
@@ -467,12 +471,9 @@ def setGamePlayers():
                     break
                 elif option == "sh":
                     player_in_game(players_in_game)
-                elif len(players_in_game) == 6:
-                    player_in_game(players_in_game=players_in_game)
-                    selecion = False
-                    break   
                 else:
                     input("Ese ID no es valido\nPulsa enter para continuar")
+                
             if not selecion:
                 break
             player_in_game(players_in_game=players_in_game)
@@ -700,6 +701,74 @@ def decisionBancaPedir(cartasEnBaraja,mazo,roundPoints,rasgo,puntos,players):
     else:
         return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
 
+def repartir_puntos(players):
+    bank = []
+    puntos_a_dar = {}
+    for i in players:
+        if players[i]['bank'] == True:
+            bank.append(i)
+            bank.append(players[i]['roundPoints'])
+    for i in players:
+        if bank[1] == 7.5:
+            break
+        if players[i]['roundPoints'] > bank[1] and players[i]['roundPoints'] <= 7.5:
+            if players[i]['roundPoints'] == 7.5:
+                puntos_a_dar[i] = players[i]['bet'] * 2 
+            else:
+                puntos_a_dar[i] = players[i]['bet']
+    if len(puntos_a_dar) > 0:
+        for i in puntos_a_dar:
+            if players[bank[0]]['points'] > 0 or players[bank[0]]['points'] > 7.5:
+                if(players[bank[0]]['points'] - puntos_a_dar[i]) <= 0:
+                    players[i]['points'] += players[bank[0]]['points']
+                    players[bank[0]]['points'] = 0
+                else:
+                    players[bank[0]]['points'] -= puntos_a_dar[i]
+                    players[i]['points'] += puntos_a_dar[i]
+    for i in players:
+        if players[bank[0]]['points'] > 7.5:
+            break
+        if players[i]['roundPoints'] <= players[bank[0]]['roundPoints'] or players[i]['roundPoints'] > 7.5:
+            if players[i] != players[bank[0]]: 
+                if (players[i]['points'] - players[i]['bet']) <=0:
+                    players[i]['points'] = 0
+                    players[bank[0]]['points']+= players[i]['points']
+                else:
+                    players[i]['points'] -= players[i]['bet']
+                    players[bank[0]]['points']+= players[i]['bet']
+    siete_medio = []
+    for i in players:
+        if players[i]['roundPoints'] == 7.5:
+            siete_medio.append(i)
+    if len(siete_medio) >= 1:
+        if len(siete_medio) == 1:
+            players[siete_medio[0]]['bank'] == True
+            players[bank[0]]['bank'] = False
+        else:
+            lista = []
+            for i in siete_medio:
+                lista.append(players[i]['priority'])
+            for i in range(len(lista) - 1):
+                for j in range(len(lista) - i - 1):
+                    if lista[j] < lista[j + 1]:
+                        numero = lista[j]
+                        lista[j] = lista[j + 1]
+                        lista[j + 1] = numero
+            for i in players:
+                if players[i]['priority'] == lista[0]:
+                    players[i]['bank'] = True
+                    players[bank[0]]['bank'] = False
+    for i in players:
+        players[i]['roundPoints'] = 0
+        players[i]['cards'] = []
+        players[i]['bet'] = 0
+    deletes= []
+    for i in players:
+        if players[i]['points'] == 0:
+            deletes.append(i)
+    for i in deletes:
+        players.pop(i)
+    return players
 
 def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
     #print(len(baraja))
@@ -717,18 +786,19 @@ def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
     #print(players)
     #input()
     while True:
-        roundPoints = settings_game["players"][jugador]["roundPoints"]
+        roundPoints = players[jugador]["roundPoints"]
 
         if decisionBancaPedir(baraja,mazo,roundPoints,rasgo,puntos,players):
             elemento0 = baraja[0]
 
-            settings_game["players"][jugador]["roundPoints"] += cartasES[elemento0]["value"]
+            players[jugador]["roundPoints"] += cartasES[elemento0]["value"]
 
-            settings_game["players"][jugador]["cards"].append(elemento0)
+            players[jugador]["cards"].append(elemento0)
 
             baraja.remove(elemento0)
         else:
             break
+    return players
 
 def menuJuegoHumano():
     crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=59)
@@ -776,7 +846,8 @@ def play():
 
                         if settings_game["players"][jugador]["human"] == False:
                             if settings_game["players"][jugador]["bank"] == True:
-                                autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
+                                players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
+
                             else:
                                 players = apostarPuntosBot(players,jugador,rasgo,puntos)
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
@@ -791,6 +862,7 @@ def play():
                         #uno_en_mesa([jugador],players)
                         input()
         #no te olvides de resetear el diccionario
+            players = repartir_puntos(players)
 
 #Ranking functions
 def ranking():
