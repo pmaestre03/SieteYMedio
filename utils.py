@@ -652,17 +652,20 @@ def autoPlayBot(baraja,mazo,rasgo,jugador):
 def listarPuntosJugadores(dicPlayers):
     listaPuntosJugadores = []
     for i in dicPlayers:
-        listaPuntosJugadores.append(dicPlayers[i]["roundPoints"])
+        if not dicPlayers[i]["bank"]:
+            listaPuntosJugadores.append(dicPlayers[i]["roundPoints"])
     return listaPuntosJugadores
 def listarApuestasJugadores(dicPlayers):
     listaApuestaJugadores = []
     for i in dicPlayers:
-        listaApuestaJugadores.append(dicPlayers[i]["bet"])
+        if not dicPlayers[i]["bank"]:
+            listaApuestaJugadores.append(dicPlayers[i]["bet"])
     return listaApuestaJugadores
 def sumarApuestasJugadores(dicPlayers):
     sumaApuestaJugadores = 0
     for i in dicPlayers:
-        sumaApuestaJugadores += dicPlayers[i]["bet"]
+        if not dicPlayers[i]["bank"]:
+            sumaApuestaJugadores += dicPlayers[i]["bet"]
     return sumaApuestaJugadores
 
 def decisionBancaPedir(cartasEnBaraja,mazo,roundPoints,rasgo,puntos,players):
@@ -672,32 +675,39 @@ def decisionBancaPedir(cartasEnBaraja,mazo,roundPoints,rasgo,puntos,players):
 
     if roundPoints == 7.5:
         return False
+    if roundPoints == 0 or roundPoints == 0.5:
+        return True
     elif roundPoints < 7.5:
         
         totalPuntosRepartir = 0
 
-        for i in range(len(listaPuntosJugadores)-1):
+        for i in range(len(listaPuntosJugadores)):
             if roundPoints < listaPuntosJugadores[i]:
                 totalPuntosRepartir += listaApuestaJugadores[i]
 
         #Porque eso significa que ha ganado a todos los players
         if totalPuntosRepartir == 0:
+            print("totalPuntosRepartir == 0")
+            input()
             return False
 
         #Esto significa que no supera a ningun jugador
         elif sumaPuntosApostados == totalPuntosRepartir:
+            print("sumaPuntosApostados == totalPuntosRepartir")
+            input()
             return True
 
         #Esto significa si despues de repartir los puntos se queda sin
         elif totalPuntosRepartir >= puntos:
+            print("totalPuntosRepartir >= puntos:")
+            input()
             return True
 
         #Esto significa si despues de repartir los puntos aun tiene
         elif totalPuntosRepartir < puntos:
+            print("totalPuntosRepartir < puntos")
+            input()
             return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
-
-    elif roundPoints == 0 or roundPoints == 0.5:
-        return True
     else:
         return pedirSegunRasgo(cartasEnBaraja,mazo,rasgo,roundPoints)
 
@@ -711,14 +721,21 @@ def repartir_puntos(players):
     for i in players:
         if bank[1] == 7.5:
             break
-        if players[i]['roundPoints'] > bank[1] and players[i]['roundPoints'] <= 7.5:
+        if players[i]['roundPoints'] > bank[1] and players[i]['roundPoints'] <= 7.5 or players[bank[0]]["roundPoints"] > 7.5:
             if players[i]['roundPoints'] == 7.5:
-                puntos_a_dar[i] = players[i]['bet'] * 2 
+                puntos_a_dar[i] = players[i]['bet'] * 2
             else:
                 puntos_a_dar[i] = players[i]['bet']
     if len(puntos_a_dar) > 0:
         for i in puntos_a_dar:
-            if players[bank[0]]['points'] > 0 or players[bank[0]]['points'] > 7.5:
+            if players[bank[0]]['roundPoints'] > 0 and players[bank[0]]['roundPoints'] <= 7.5:
+                if(players[bank[0]]['points'] - puntos_a_dar[i]) <= 0:
+                    players[i]['points'] += players[bank[0]]['points']
+                    players[bank[0]]['points'] = 0
+                else:
+                    players[bank[0]]['points'] -= puntos_a_dar[i]
+                    players[i]['points'] += puntos_a_dar[i]
+            if players[bank[0]]["roundPoints"] > 7.5:
                 if(players[bank[0]]['points'] - puntos_a_dar[i]) <= 0:
                     players[i]['points'] += players[bank[0]]['points']
                     players[bank[0]]['points'] = 0
@@ -726,7 +743,7 @@ def repartir_puntos(players):
                     players[bank[0]]['points'] -= puntos_a_dar[i]
                     players[i]['points'] += puntos_a_dar[i]
     for i in players:
-        if players[bank[0]]['points'] > 7.5:
+        if players[bank[0]]['roundPoints'] > 7.5:
             break
         if players[i]['roundPoints'] <= players[bank[0]]['roundPoints'] or players[i]['roundPoints'] > 7.5:
             if players[i] != players[bank[0]]: 
@@ -737,12 +754,23 @@ def repartir_puntos(players):
                     players[i]['points'] -= players[i]['bet']
                     players[bank[0]]['points']+= players[i]['bet']
     siete_medio = []
+    if players[bank[0]]["points"] <= 0:
+        lista = []
+        for i in players:
+            if i != players[bank[0]]:
+                lista.append(players[i]['priority'])
+        for i in range(len(lista) - 1):
+            for j in range(len(lista) - i - 1):
+                if lista[j] < lista[j + 1]:
+                    numero = lista[j]
+                    lista[j] = lista[j + 1]
+                    lista[j + 1] = numero
     for i in players:
-        if players[i]['roundPoints'] == 7.5:
+        if players[i]['roundPoints'] == 7.5 and players[i]["bank"] == False:
             siete_medio.append(i)
     if len(siete_medio) >= 1:
         if len(siete_medio) == 1:
-            players[siete_medio[0]]['bank'] == True
+            players[siete_medio[0]]['bank'] = True
             players[bank[0]]['bank'] = False
         else:
             lista = []
@@ -771,27 +799,13 @@ def repartir_puntos(players):
     return players
 
 def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
-    #print(len(baraja))
-    #input()
-    #print(mazo)
-    #input()
-    #print(rasgo)
-    #input()
-    #print(jugador)
-    #input()
-    #print(roundPoints)
-    #input()
-    #print(puntos)
-    #input()
-    #print(players)
-    #input()
     while True:
         roundPoints = players[jugador]["roundPoints"]
 
         if decisionBancaPedir(baraja,mazo,roundPoints,rasgo,puntos,players):
             elemento0 = baraja[0]
 
-            players[jugador]["roundPoints"] += cartasES[elemento0]["value"]
+            players[jugador]["roundPoints"] += mazo[elemento0]["value"]
 
             players[jugador]["cards"].append(elemento0)
 
