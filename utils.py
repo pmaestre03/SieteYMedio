@@ -834,18 +834,20 @@ def play():
 
             for prioridadJugador in listaPrioridad:
 
-                for jugador in settings_game["players"]:
-                    if settings_game["players"][jugador]["priority"] == prioridadJugador:
+                for jugador in players:
+                    if players[jugador]["priority"] == prioridadJugador:
 
                         limpiarTerminal()
                         printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
 
-                        rasgo = settings_game["players"][jugador]["type"]
-                        roundPoints = settings_game["players"][jugador]["roundPoints"]
-                        puntos = settings_game["players"][jugador]["points"]
+                        rasgo = players[jugador]["type"]
+                        roundPoints = players[jugador]["roundPoints"]
+                        puntos = players[jugador]["points"]
 
-                        if settings_game["players"][jugador]["human"] == False:
-                            if settings_game["players"][jugador]["bank"] == True:
+                        if players[jugador]["human"] == False:
+                            if players[jugador]["bank"] == True:
+                                print("xd")
+                                input()
                                 players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
 
                             else:
@@ -853,7 +855,7 @@ def play():
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
                             
                         else:
-                            if settings_game["players"][jugador]["bank"] == True:
+                            if players[jugador]["bank"] == True:
                                 menuJuegoHumano()
 
                             else:
