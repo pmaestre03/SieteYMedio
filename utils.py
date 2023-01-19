@@ -880,6 +880,16 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
         elif opcion == "6":
             return
 
+def end(players,ronda):
+    winner = players[0]
+    if len(players) == 1:
+        cadena = 'the winer is ' + winner + ' - ' + players[winner] + 'en la ronda '+ ronda + 'con los puntos '+ players[winner]['points']
+        print(cadena)
+        return True
+    else:
+        return False
+
+
 def play():
     if settings_game["n_players"] < 2:
         input("Debes al menos 2 jugadores en la partida para poder empezar\nPulsa enter para continuar")
@@ -916,14 +926,16 @@ def play():
                             
                         else:
                             menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
-                        mesa(listaPrioridad)
-                        #uno_en_mesa([jugador],players)
-                        input()
+                mesa(listaPrioridad)
+                #uno_en_mesa([jugador],players)
+                input()
         #no te olvides de resetear el diccionario
             players = repartir_puntos(players)
             listaPrioridad = ordenar_prioridad_inGame()
-            print(listaPrioridad)
             input()
+            fin = end(players,ronda)
+            if fin == True:
+                break
 
 #Ranking functions
 def ranking():
