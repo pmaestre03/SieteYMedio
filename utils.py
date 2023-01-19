@@ -613,7 +613,7 @@ def mesa(lista):
                     if j == players[i]['priority']:
                         cadena += str(players[i][h]).ljust(50)
             cadena+='\n'
-    print(cadena)
+        print(cadena)
 
 def uno_en_mesa(lista,players):
     for i in players:
