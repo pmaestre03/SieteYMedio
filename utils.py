@@ -595,7 +595,7 @@ def mesa(lista):
         print(cadena)
         if len(lista) >= 4:
             print('-'*140)
-            cadena = ''
+            cadena = ""
             lista=lista[3:]
             for h in si:
                 cadena += str(h).ljust(20).title()
@@ -604,6 +604,7 @@ def mesa(lista):
                         if j == players[i]['priority']:
                             cadena += str(players[i][h]).ljust(50)
                 cadena+='\n'
+            print(cadena)
     else:
         for h in si:
             cadena += str(h).ljust(20).title()
@@ -647,11 +648,17 @@ def turnoBot(cartasEnBaraja,mazo,puntos,rasgo):
 
 def apostarPuntosBot(players,player,rasgo,puntos):
     if players[player]["bet"] == 0:
-        if players[player]["points"] == 1:
-            players[player]["bet"] = 1
-        else:
-            apuesta = puntos * (rasgo/100)
+        apuesta = puntos * (rasgo/100)
+
+        for i in players:
+            if players[i]["bank"]:
+                if apuesta > players[i]["points"]:
+                    apuesta = players[i]["points"]
+
+            if apuesta > players[player]["points"]:
+                apuesta = players[player]["points"]
             players[player]["bet"] = int(apuesta)
+            
     return players
 
 def autoPlayBot(baraja,mazo,rasgo,jugador):
@@ -672,19 +679,19 @@ def autoPlayBot(baraja,mazo,rasgo,jugador):
 def listarPuntosJugadores(dicPlayers):
     listaPuntosJugadores = []
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"]:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
             listaPuntosJugadores.append(dicPlayers[i]["roundPoints"])
     return listaPuntosJugadores
 def listarApuestasJugadores(dicPlayers):
     listaApuestaJugadores = []
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"]:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
             listaApuestaJugadores.append(dicPlayers[i]["bet"])
     return listaApuestaJugadores
 def sumarApuestasJugadores(dicPlayers):
     sumaApuestaJugadores = 0
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"]:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
             sumaApuestaJugadores += dicPlayers[i]["bet"]
     return sumaApuestaJugadores
 
@@ -839,7 +846,7 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
         opcion = comprobarInput("Opcion: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
 
         if opcion == "1":
-            uno_en_mesa([jugador])
+            uno_en_mesa([jugador],players)
         elif opcion == "2":
             mesa(listaPrioridad)
         elif opcion == "3":
@@ -847,47 +854,60 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
                 input('no es posible cambiar la apuesta\nenter para continuar\n')
             else:
                 bet  = comprobarInput("apuesta: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,players[jugador]['points']))
+                bet = int(bet)
                 for i in players:
                     if players[i]['bank'] == True:
                         if bet > players[i]['points']:
                             print('la apuesta no puede ser major a los puntos totales de la banca')
                         else:
                             apuesta = True
+                            players[jugador]["bet"] = bet
                             break
         elif opcion == "4":
             if apuesta == False:
                 input('seleciona la apuesta antes de jugar\nenter para continuar\n')
             else:
+                cartasPasarse = 0
+                roundPoints = players[jugador]["roundPoints"]
+                for carta in baraja:
+                    valorCarta = mazo[carta]["realValue"]
+                    if roundPoints + valorCarta > 7.5:
+                        cartasPasarse += 1
+                cartasPorSalir = len(baraja)
                 formula = (cartasPasarse/cartasPorSalir)*100
-                elemento0 = baraja[0]
-                players[jugador]["roundPoints"] += mazo[elemento0]["value"]
-                players[jugador]["cards"].append(elemento0)  
+
                 if len(players[jugador]["cards"]) == 0:
-                    cadena = 'la nueva carta es '+ players[jugador]["cards"] +'\nlos puntos totales actuales son ' +  players[jugador]["roundPoints"] 
+                    elemento0 = baraja[0]
+                    players[jugador]["roundPoints"] += mazo[elemento0]["value"]
+                    players[jugador]["cards"].append(elemento0)
+                    cadena = 'la nueva carta es '+ players[jugador]["cards"][len(players[jugador]["cards"])-1] +'\nlos puntos totales actuales son ' +  str(players[jugador]["roundPoints"])
                     print(cadena)
-                else:
-                    otra = comprobarInput('la probavilidad de que te pases de 7,5 es '+ formula+'\nestas seguro de que quieres pedir carta? Y/y = yes cualquier otra tecla = no' ,lJust=59)
-                    if otra.lower == 'y':
-                            cadena = 'la nueva carta es '+ players[jugador]["cards"] +'\nlos puntos totales actuales son ' +  players[jugador]["roundPoints"] 
-                            print(cadena)
                     baraja.remove(elemento0)
+                else:
+                    otra = comprobarInput('La probavilidad de que te pases de 7,5 es '+ str(formula) +'\nestas seguro de que quieres pedir carta? Y/y = yes cualquier otra tecla = no: ' ,lJust=59)
+                    if otra.lower() == 'y':
+                        elemento0 = baraja[0]
+                        players[jugador]["roundPoints"] += mazo[elemento0]["value"]
+                        players[jugador]["cards"].append(elemento0)
+                        cadena = 'la nueva carta es '+ players[jugador]["cards"][len(players[jugador]["cards"])-1] +'\nlos puntos totales actuales son ' +  str(players[jugador]["roundPoints"])
+                        print(cadena)
+                        baraja.remove(elemento0)
         elif opcion == "5":
             if players[jugador]["bank"] == True:
                 players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
             else:
-                players = apostarPuntosBot(players,jugador,rasgo,puntos)
+                if apuesta == False:
+                    players = apostarPuntosBot(players,jugador,rasgo,puntos)
                 autoPlayBot(baraja,mazo,rasgo,jugador)
+            input()
+            return players
         elif opcion == "6":
-            return
+            return players
 
 def end(players,ronda):
     winner = players[0]
-    if len(players) == 1:
-        cadena = 'the winer is ' + winner + ' - ' + players[winner] + 'en la ronda '+ ronda + 'con los puntos '+ players[winner]['points']
-        print(cadena)
-        return True
-    else:
-        return False
+    cadena = 'the winer is ' + winner + ' - ' + players[winner] + 'en la ronda '+ ronda + 'con los puntos '+ players[winner]['points']
+    print(cadena)
 
 
 def play():
@@ -925,7 +945,7 @@ def play():
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
                             
                         else:
-                            menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
+                            players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
                 mesa(listaPrioridad)
                 #uno_en_mesa([jugador],players)
                 input()
@@ -933,8 +953,8 @@ def play():
             players = repartir_puntos(players)
             listaPrioridad = ordenar_prioridad_inGame()
             input()
-            fin = end(players,ronda)
-            if fin == True:
+            if len(players) == 1:
+                end(players,ronda)
                 break
 
 #Ranking functions
