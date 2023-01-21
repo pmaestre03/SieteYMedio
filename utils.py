@@ -1,3 +1,6 @@
+
+
+
 from random import *
 import pymysql
 from variables import *
@@ -150,6 +153,26 @@ def returnBarajaMezclada(mazo):
     shuffle(baraja)
     return baraja
 
+def inserts_game_bbdd():
+    mazo = settings_game["deck"]
+    k_mazo = mazo.keys()
+    add_initial_in_bbdd = conn.cursor()
+    if 'O01' in k_mazo:
+        query_initial_add_game_in_bbdd = f"insert into games(initial_time,n_players,n_round,type_deck) values ((select SYSDATE()),{settings_game['n_players']},{settings_game['n_rouds']},'española')"
+    else:
+        query_initial_add_game_in_bbdd = f"insert into games(initial_time,n_players,n_round,type_deck) values ((select SYSDATE()),{settings_game['n_players']},{settings_game['n_rouds']},'poker')"
+    add_initial_in_bbdd.execute(query_initial_add_game_in_bbdd)
+    conn.commit()
+
+def update_game_bbdd():
+    update_game_in_bbdd = conn.cursor()
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    query_end_game_bbdd = f"update games set end_time = (select sysdate()) where id_game = @id"
+    update_game_in_bbdd.execute(query_end_game_bbdd)
+    conn.commit()
 
 #Players conf functions
 def playersConf():
@@ -205,6 +228,7 @@ def newPlayer(esBot=False):
         cur.execute(query)
         conn.commit()
         input("Jugador creado correctamente\nPulsa enter para continuar")
+    
 
 
 
@@ -335,7 +359,6 @@ def mostrarPlayers_settings(players_in_game_list=[]):
 
     while True:
         cadena1 = ''
-
         if len(l_b)>0:
             while True:
                 if l_b[0][0] not in players_in_game_list:
@@ -352,19 +375,33 @@ def mostrarPlayers_settings(players_in_game_list=[]):
                         cadena1 += "".ljust(69) + "||".ljust(1)
                         break
         if len(l_h)>0:
-            while True:
-                if l_h[0][0] not in players_in_game_list:
-                    cadena1 += l_h[0][0].ljust(19) + " " + l_h[0][1].ljust(24) + " " + reisgoEnTexto(l_h[0][2]).ljust(25)
-                    break
-                else:
-                    try:
-                        if len(l_h) > 1:
-                            l_h = l_h[1:]
-                        else:
-                            raise
-                    except:
+            if len(l_b)==0:
+                while True:
+                    if l_h[0][0] not in players_in_game_list:
+                        cadena1 += "".ljust(69) + "||".ljust(1) + l_h[0][0].ljust(19) + " " + l_h[0][1].ljust(24) + " " + reisgoEnTexto(l_h[0][2]).ljust(25)
                         break
-                    
+                    else:
+                        try:
+                            if len(l_h) > 1:
+                                l_h = l_h[1:]
+                            else:
+                                raise
+                        except:
+                            break
+            else:
+                while True:
+                    if l_h[0][0] not in players_in_game_list:
+                        cadena1 += l_h[0][0].ljust(19) + " " + l_h[0][1].ljust(24) + " " + reisgoEnTexto(l_h[0][2]).ljust(25)
+                        break
+                    else:
+                        try:
+                            if len(l_h) > 1:
+                                l_h = l_h[1:]
+                            else:
+                                raise
+                        except:
+                            break
+                        
         l_b,l_h = l_b[1:],l_h[1:]
 
         print(cadena1)
@@ -450,13 +487,14 @@ def setGamePlayers():
             while True:
                 print("".ljust(6)+"Opciones: id para añadir a la partida, -id para eliminar de la partida, sh para mostrar los jugadores en partida, -1 para salir")
                 option = comprobarInput("> ",lJust=6,soloText=False,permitirCaractEspeciales=True,excepciones=['-1'])
-                if option[0]== '-' and option[1:] in players_in_game:
-                    input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
-                    players_in_game.remove(option[1:])
-                    break
-                if len(players_in_game) == 6:
+                if len(players_in_game) == 6 and option[0] != '-' and option != '-1' and option != "sh":
+                    input("No puedes poner más de 6 jugadores\nPulsa enter para continuar")
                     player_in_game(players_in_game=players_in_game)
                     selecion = False
+                    break
+                if option[0] == '-' and option[1:] in players_in_game:
+                    input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
+                    players_in_game.remove(option[1:])
                     break
                 elif not checkExistenceDNI(option):
                     if not option in players_in_game:
@@ -578,9 +616,9 @@ def ordenar_prioridad_inGame():
             lista.append(settings_game["players"][i]['priority'])
     return lista
 
-def mesa(lista):
+def mesa(lista,ronda,jugador):
     limpiarTerminal()
-    printSevenAndHalfTitle("")
+    printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
 
     players = settings_game["players"]
 
@@ -620,7 +658,7 @@ def mesa(lista):
 
 def uno_en_mesa(lista,players):
     limpiarTerminal()
-    printSevenAndHalfTitle()
+    printSevenAndHalfTitle("")
 
     for i in players:
         si = list(players[i].keys())
@@ -844,9 +882,7 @@ def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
             break
     return players
 
-def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad):
-    limpiarTerminal()
-    printSevenAndHalfTitle("")
+def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad,ronda):
     apuesta = False
     while True:
         crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=59)
@@ -856,22 +892,28 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
         if opcion == "1":
             uno_en_mesa([jugador],players)
             input()
+            limpiarTerminal()
+            printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
         elif opcion == "2":
-            mesa(listaPrioridad)
+            mesa(listaPrioridad,ronda,jugador)
             input()
+            limpiarTerminal()
+            printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
         elif opcion == "3":
             if apuesta == True:
                 input('no es posible cambiar la apuesta\nenter para continuar\n')
             else:
-                bet  = comprobarInput("apuesta: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,players[jugador]['points']))
+                bet  = comprobarInput("Apuesta: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,players[jugador]['points']))
                 bet = int(bet)
                 for i in players:
                     if players[i]['bank'] == True:
                         if bet > players[i]['points']:
-                            print('la apuesta no puede ser major a los puntos totales de la banca')
+                            print('La apuesta no puede ser major a los puntos totales de la banca')
                         else:
                             apuesta = True
                             players[jugador]["bet"] = bet
+                            limpiarTerminal()
+                            printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
                             break
         elif opcion == "4":
             if apuesta == False:
@@ -902,6 +944,9 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
                         cadena = 'la nueva carta es '+ players[jugador]["cards"][len(players[jugador]["cards"])-1] +'\nlos puntos totales actuales son ' +  str(players[jugador]["roundPoints"])
                         print(cadena)
                         baraja.remove(elemento0)
+            input()
+            limpiarTerminal()
+            printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
         elif opcion == "5":
             if players[jugador]["bank"] == True:
                 players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
@@ -911,9 +956,15 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
                 autoPlayBot(baraja,mazo,rasgo,jugador)
             return players
         elif opcion == "6":
-            return players
+            if apuesta == False:
+                input('Seleciona la apuesta antes de plantarse\nenter para continuar\n')
+            elif players[jugador]["roundPoints"] == 0:
+                input('Coge carta antes de plantarse\nenter para continuar\n')
+            else:
+                return players
 
 def endPorPlayers(players,ronda):
+    update_game_bbdd()
     winnerID = ""
     winnerName = ""
     winnerPoints = 0
@@ -925,6 +976,7 @@ def endPorPlayers(players,ronda):
     print(cadena)
 
 def endPorRondas(players):
+    update_game_bbdd()
     listaPuntosJugadores = []
     listaJugadores = []
     for i in players:
@@ -963,7 +1015,7 @@ def play():
 
         mazo = settings_game["deck"]
         players = settings_game["players"]
-        
+        inserts_game_bbdd()
         for ronda in range(settings_game["n_rouds"]):
             baraja = returnBarajaMezclada(settings_game["deck"])
 
@@ -988,9 +1040,8 @@ def play():
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
                             
                         else:
-                            players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
-
-                mesa(listaPrioridad)
+                            players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad,ronda)
+                mesa(listaPrioridad,ronda,jugador)
                 input()
 
         #no te olvides de resetear el diccionario
@@ -1007,7 +1058,6 @@ def play():
         #!!!!!!!!!!!!!!!!!resetear todo a 0
         return
 
-
 #Ranking functions
 def ranking():
     limpiarTerminal()
@@ -1015,7 +1065,7 @@ def ranking():
         printSevenAndHalfTitle(" Clasificación ")
         crearMenu(["Jugadores con más Puntos","Jugadores con más Partidas Jugadas","Jugadores con más Minutos Jugados","Atras"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
+        opcion = comprobarInput("> ",soloText = False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
             showPlayersWithMoreEarning()
@@ -1027,24 +1077,155 @@ def ranking():
             break
 
 def showPlayersWithMoreEarning():
+    query = f"select * from scores"
+    cur.execute(query)
+    scores = cur.fetchall()
+    var = list(scores)
+    for pasadas in range(len(var)-1):
+            for comp in range(len(var)-1-pasadas):
+                if var[comp][2] < var[comp+1][2]:
+                    var[comp],var[comp+1] = var[comp+1],var[comp]
+    tres_mejores = []
+    ord_print = '='*37+'\n'+'DNI'.ljust(13)+'Profits'.ljust(10)+'Games'.ljust(7)+'Minutes'.rjust(5)+'\n'+'='*37
+    print(ord_print)
+    for i in range(3):
+        tres_mejores.append(var[i])
+    for i in tres_mejores:
+        listaOrd = f'{i[1]}'.ljust(13)+f'{i[2]}'.ljust(10)+f'{i[3]}'.ljust(7)+f'{i[4]}'.rjust(5)
+        print(listaOrd)
+    input()
     print("PWME")
 
 def showPlayersWithMoreGamesPlayed():
+    query = f"select * from scores"
+    cur.execute(query)
+    scores = cur.fetchall()
+    var = list(scores)
+    for pasadas in range(len(var)-1):
+        for comp in range(len(var)-1-pasadas):
+            if var[comp][3] < var[comp+1][3]:
+                var[comp],var[comp+1] = var[comp+1],var[comp]
+    tres_mejores = []
+    ord_print = '='*37+'\n'+'DNI'.ljust(13)+'Profits'.ljust(10)+'Games'.ljust(7)+'Minutes'.rjust(5)+'\n'+'='*37
+    print(ord_print)
+    for i in range(3):
+        tres_mejores.append(var[i])
+    for i in tres_mejores:
+        listaOrd = f'{i[1]}'.ljust(13)+f'{i[2]}'.ljust(10)+f'{i[3]}'.ljust(7)+f'{i[4]}'.rjust(5)
+        print(listaOrd)
+    input()
     print("PWMGP")
 
 def showPlayersWithMoreMinutesPlayed():
+    query = f"select * from scores"
+    cur.execute(query)
+    scores = cur.fetchall()
+    var = list(scores)
+    for pasadas in range(len(var)-1):
+            for comp in range(len(var)-1-pasadas):
+                if var[comp][4] < var[comp+1][4]:
+                    var[comp],var[comp+1] = var[comp+1],var[comp]
+    tres_mejores = []
+    ord_print = '='*37+'\n'+'DNI'.ljust(13)+'Profits'.ljust(10)+'Games'.ljust(7)+'Minutes'.rjust(5)+'\n'+'='*37
+    print(ord_print)
+    for i in range(3):
+        tres_mejores.append(var[i])
+    for i in tres_mejores:
+        listaOrd = f'{i[1]}'.ljust(13)+f'{i[2]}'.ljust(10)+f'{i[3]}'.ljust(7)+f'{i[4]}'.rjust(5)
+        print(listaOrd)
+    input()
     print("PWMMP")
 
 #Reports Functions
+def rep_prop2():
+    prop2 = conn.cursor()
+    queryprop2 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select max(r.points_bet) from round)"
+    prop2.execute(queryprop2)
+    propuesta2 = list(prop2.fetchall())
+    print(propuesta2)
+    input()
+    return
+
+def rep_prop3():
+    prop3 = conn.cursor()
+    queryprop3 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select min(r.points_bet)from round);"
+    prop3.execute(queryprop3)
+    propuesta3 = list(prop3.fetchall())
+    print(propuesta3)
+    input()
+    return
+
+def rep_prop5():
+    prop5 = conn.cursor()
+    queryprop5 = f"select w.id_game,w.points from winners w inner join player p on w.dni = p.dni where p.human = 0;"
+    prop5.execute(queryprop5)
+    propuesta5 = list(prop5.fetchall())
+    print(propuesta5)
+    input()
+    return
+
+def rep_prop7():
+    prop7 = conn.cursor()
+    queryprop7 = f"select g.id_game,count(distinct dni) as banca from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where r.bank = 1 group by g.id_game;"
+    prop7.execute(queryprop7)
+    propuesta7 = list(prop7.fetchall())
+    print(propuesta7)
+    input()
+    return
+
+def rep_prop8():
+    prop8 = conn.cursor()
+    queryprop8 = f"select g.id_game,avg(r.points_bet) as media_puntos_partida from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round group by rg.id_game;"
+    prop8.execute(queryprop8)
+    propuesta8 = list(prop8.fetchall())
+    print(propuesta8)
+    input()
+    return
+
+def rep_prop9():
+    prop9 = conn.cursor()
+    queryprop9 = f"select g.id_game,avg(r.points_bet) as media from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where rg.id_round = 1 group by rg.id_round_games;"
+    prop9.execute(queryprop9)
+    propuesta9 = list(prop9.fetchall())
+    print(propuesta9)
+    input()
+    return
+
+def rep_prop10():
+    prop10 = conn.cursor()
+    queryprop10 = f"select g.id_game,avg(r.points_bet) as media_ultima_ronda from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where rg.id_round = (select max(rg.id_round) from round_games) group by rg.id_round_games;"
+    prop10.execute(queryprop10)
+    propuesta10 = list(prop10.fetchall())
+    print(propuesta10)
+    input()
+    return
+
 def reports():
     limpiarTerminal()
     while True:
         printSevenAndHalfTitle(" Reportes ")
-        crearMenu(["Esto","Aun","Esta","Por","Acabar","Porfavor","Sal","Go back"],") ",empezarEnCero=False)
+        crearMenu(["Initial card more repeated by each user, only users who have played a minimum of 3 games.","Player who makes the highest bet per game, find the round with the highest bet."
+        ,"Player who makes the lowest bet per game.","Percentage of rounds won per player in each game (%), as well as their average bet for the game.",
+        "List of games won by Bots.","Rounds won by the bank in each game.","Number of users have been the bank in each game.","Average bet per game.",
+        "Average bet of the first round of each game.","Average bet of the last round of each game.","Go back"],") ",empezarEnCero=False)
 
-        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,8))
-
-        if opcion == "1":
-            print("nada")
-        elif opcion == "8":
+        opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,11))
+        if opcion == "1" or opcion == "4" or opcion == "6":
+            print("Not implemented")
+            input()
+        if opcion == "2":
+            rep_prop2()
+        if opcion == "3":
+            rep_prop3()
+        if opcion == "5":
+            rep_prop5()
+        if opcion == "7":
+            rep_prop7()
+        if opcion == "8":
+            rep_prop8()
+        if opcion == "9":
+            rep_prop9()
+        if opcion == "10":
+            rep_prop10()
+        elif opcion == "11":
             break
