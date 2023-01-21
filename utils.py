@@ -579,6 +579,9 @@ def ordenar_prioridad_inGame():
     return lista
 
 def mesa(lista):
+    limpiarTerminal()
+    printSevenAndHalfTitle("")
+
     players = settings_game["players"]
 
     for i in players:
@@ -616,6 +619,9 @@ def mesa(lista):
         print(cadena)
 
 def uno_en_mesa(lista,players):
+    limpiarTerminal()
+    printSevenAndHalfTitle()
+
     for i in players:
         si = list(players[i].keys())
     cadena = ''
@@ -839,6 +845,8 @@ def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
     return players
 
 def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad):
+    limpiarTerminal()
+    printSevenAndHalfTitle("")
     apuesta = False
     while True:
         crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=59)
@@ -847,8 +855,10 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
 
         if opcion == "1":
             uno_en_mesa([jugador],players)
+            input()
         elif opcion == "2":
             mesa(listaPrioridad)
+            input()
         elif opcion == "3":
             if apuesta == True:
                 input('no es posible cambiar la apuesta\nenter para continuar\n')
@@ -899,15 +909,48 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
                 if apuesta == False:
                     players = apostarPuntosBot(players,jugador,rasgo,puntos)
                 autoPlayBot(baraja,mazo,rasgo,jugador)
-            input()
             return players
         elif opcion == "6":
             return players
 
-def end(players,ronda):
-    winner = players[0]
-    cadena = 'the winer is ' + winner + ' - ' + players[winner] + 'en la ronda '+ ronda + 'con los puntos '+ players[winner]['points']
+def endPorPlayers(players,ronda):
+    winnerID = ""
+    winnerName = ""
+    winnerPoints = 0
+    for i in players:
+        winnerID = i
+        winnerName = players[i]["name"]
+        winnerPoints = players[i]["points"]
+    cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda '+ str(ronda) + ', con los puntos '+ str(winnerPoints)
     print(cadena)
+
+def endPorRondas(players):
+    listaPuntosJugadores = []
+    listaJugadores = []
+    for i in players:
+        listaPuntosJugadores.append(players[i]["points"])
+        listaJugadores.append(i)
+
+    for i in range(len(listaPuntosJugadores)):
+        for j in range(0, len(listaPuntosJugadores)-i-1):
+            if listaPuntosJugadores[j] < listaPuntosJugadores[j+1]:
+                listaPuntosJugadores[j], listaPuntosJugadores[j+1] = listaPuntosJugadores[j+1], listaPuntosJugadores[j]
+                listaJugadores[j],listaJugadores[j+1] = listaJugadores[j+1],listaJugadores[j]
+
+    maximoPuntos = listaPuntosJugadores[0]
+    #En caso de que haya un empate entre jugadores
+    listaGanadores = []
+    for i in range(len(listaPuntosJugadores)):
+        if listaPuntosJugadores[i] == maximoPuntos:
+            listaGanadores.append(listaJugadores[i])
+
+    print(listaGanadores)
+    for i in listaGanadores:
+        winnerID = i
+        winnerName = players[i]["name"]
+        winnerPoints = players[i]["points"]
+        cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda maxima' + ', con los puntos '+ str(winnerPoints)
+        print(cadena)
 
 
 def play():
@@ -946,16 +989,24 @@ def play():
                             
                         else:
                             players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
+
                 mesa(listaPrioridad)
-                #uno_en_mesa([jugador],players)
                 input()
+
         #no te olvides de resetear el diccionario
             players = repartir_puntos(players)
             listaPrioridad = ordenar_prioridad_inGame()
-            input()
             if len(players) == 1:
-                end(players,ronda)
-                break
+                endPorPlayers(players,ronda)
+                input("\nPulsa enter para continuar")
+                return
+        
+        endPorRondas(players)
+        input("\nPulsa enter para continuar")
+
+        #!!!!!!!!!!!!!!!!!resetear todo a 0
+        return
+
 
 #Ranking functions
 def ranking():
