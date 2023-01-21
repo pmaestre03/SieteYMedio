@@ -1,8 +1,11 @@
+
+
+
 from random import *
 import pymysql
 from variables import *
 
-conn = pymysql.connect(host="51.145.227.94", user="pmaestre", password="P@ssw0rd", db="proyecto")
+conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", db="proyecto")
 cur = conn.cursor()
 
 settings_game = {'n_players':0}
@@ -74,48 +77,6 @@ def printSevenAndHalfTitle(mensajeFinal):
 "                  #####   ######    ##    ######  #    #      #     #  #    #  #####       #     #  #    #  ######  #     \n"+
 mensajeFinal.center(140,"=")+"\n"
 )
-def mostrarPlayers():
-    cursorHumanos = conn.cursor()
-    cursorBots = conn.cursor()
-
-    cadena = 'Select Players'.center(140,'*')+'\n'+'Boot Player'.center(69,' ')+'||'+'Player Player'.center(69,' ')+'\n'+'-'*140+'\n'+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(24)+"||".ljust(1)+"ID".ljust(20)+"Name".ljust(25)+"Type".ljust(25)+"\n"+"*"*140
-    print(cadena)
-
-    queryHumanos = f"select * from player where human = 1"
-    queryBot = f"select * from player where human = 0"
-
-    cursorHumanos.execute(queryHumanos)
-    cursorBots.execute(queryBot)
-
-    while True:
-        h = cursorHumanos.fetchone()
-        b = cursorBots.fetchone()
-
-        if type(h) == type(None) and type(b) == type(None):
-            break
-        if type(h) == type(None):
-            bList = list(b)
-            cadena = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1)
-        elif type(b) == type(None):
-            hList = list(h)
-            cadena = "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
-        else:
-            hList = list(h)
-            bList = list(b)
-            cadena = bList[0].ljust(19)+" "+bList[1].ljust(24)+" "+reisgoEnTexto(bList[2]).ljust(24) + "||".ljust(1) + hList[0].ljust(19)+" "+hList[1].ljust(24)+" "+reisgoEnTexto(hList[2]).ljust(25)
-        print(cadena)
-    print("*"*140)
-
-def reisgoEnTexto(riesgo):
-                if riesgo == 30:
-                    return "Prudente"
-                elif riesgo == 40:
-                    return "Normal"
-                elif riesgo == 50:
-                    return "Atrevido"
-                else:
-                    return str(riesgo)
-
 def mostrarPlayers():
     cursorHumanos = conn.cursor()
     cursorBots = conn.cursor()
@@ -247,6 +208,7 @@ def newPlayer(esBot=False):
         cur.execute(query)
         conn.commit()
         input("Jugador creado correctamente\nPulsa enter para continuar")
+    
 
 
 
@@ -637,7 +599,7 @@ def mesa(lista):
         print(cadena)
         if len(lista) >= 4:
             print('-'*140)
-            cadena = ''
+            cadena = ""
             lista=lista[3:]
             for h in si:
                 cadena += str(h).ljust(20).title()
@@ -646,6 +608,7 @@ def mesa(lista):
                         if j == players[i]['priority']:
                             cadena += str(players[i][h]).ljust(50)
                 cadena+='\n'
+            print(cadena)
     else:
         for h in si:
             cadena += str(h).ljust(20).title()
@@ -689,11 +652,17 @@ def turnoBot(cartasEnBaraja,mazo,puntos,rasgo):
 
 def apostarPuntosBot(players,player,rasgo,puntos):
     if players[player]["bet"] == 0:
-        if players[player]["points"] == 1:
-            players[player]["bet"] = 1
-        else:
-            apuesta = puntos * (rasgo/100)
+        apuesta = puntos * (rasgo/100)
+
+        for i in players:
+            if players[i]["bank"]:
+                if apuesta > players[i]["points"]:
+                    apuesta = players[i]["points"]
+
+            if apuesta > players[player]["points"]:
+                apuesta = players[player]["points"]
             players[player]["bet"] = int(apuesta)
+            
     return players
 
 def autoPlayBot(baraja,mazo,rasgo,jugador):
@@ -714,19 +683,19 @@ def autoPlayBot(baraja,mazo,rasgo,jugador):
 def listarPuntosJugadores(dicPlayers):
     listaPuntosJugadores = []
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"]:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
             listaPuntosJugadores.append(dicPlayers[i]["roundPoints"])
     return listaPuntosJugadores
 def listarApuestasJugadores(dicPlayers):
     listaApuestaJugadores = []
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"]:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
             listaApuestaJugadores.append(dicPlayers[i]["bet"])
     return listaApuestaJugadores
 def sumarApuestasJugadores(dicPlayers):
     sumaApuestaJugadores = 0
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"]:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
             sumaApuestaJugadores += dicPlayers[i]["bet"]
     return sumaApuestaJugadores
 
@@ -881,7 +850,7 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
         opcion = comprobarInput("Opcion: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
 
         if opcion == "1":
-            uno_en_mesa([jugador])
+            uno_en_mesa([jugador],players)
         elif opcion == "2":
             mesa(listaPrioridad)
         elif opcion == "3":
@@ -889,47 +858,61 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
                 input('no es posible cambiar la apuesta\nenter para continuar\n')
             else:
                 bet  = comprobarInput("apuesta: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,players[jugador]['points']))
+                bet = int(bet)
                 for i in players:
                     if players[i]['bank'] == True:
                         if bet > players[i]['points']:
                             print('la apuesta no puede ser major a los puntos totales de la banca')
                         else:
                             apuesta = True
+                            players[jugador]["bet"] = bet
                             break
         elif opcion == "4":
             if apuesta == False:
                 input('seleciona la apuesta antes de jugar\nenter para continuar\n')
             else:
+                cartasPasarse = 0
+                roundPoints = players[jugador]["roundPoints"]
+                for carta in baraja:
+                    valorCarta = mazo[carta]["realValue"]
+                    if roundPoints + valorCarta > 7.5:
+                        cartasPasarse += 1
+                cartasPorSalir = len(baraja)
                 formula = (cartasPasarse/cartasPorSalir)*100
-                elemento0 = baraja[0]
-                players[jugador]["roundPoints"] += mazo[elemento0]["value"]
-                players[jugador]["cards"].append(elemento0)  
+
                 if len(players[jugador]["cards"]) == 0:
-                    cadena = 'la nueva carta es '+ players[jugador]["cards"] +'\nlos puntos totales actuales son ' +  players[jugador]["roundPoints"] 
+                    elemento0 = baraja[0]
+                    players[jugador]["roundPoints"] += mazo[elemento0]["value"]
+                    players[jugador]["cards"].append(elemento0)
+                    cadena = 'la nueva carta es '+ players[jugador]["cards"][len(players[jugador]["cards"])-1] +'\nlos puntos totales actuales son ' +  str(players[jugador]["roundPoints"])
                     print(cadena)
-                else:
-                    otra = comprobarInput('la probavilidad de que te pases de 7,5 es '+ formula+'\nestas seguro de que quieres pedir carta? Y/y = yes cualquier otra tecla = no' ,lJust=59)
-                    if otra.lower == 'y':
-                            cadena = 'la nueva carta es '+ players[jugador]["cards"] +'\nlos puntos totales actuales son ' +  players[jugador]["roundPoints"] 
-                            print(cadena)
                     baraja.remove(elemento0)
+                else:
+                    otra = comprobarInput('La probavilidad de que te pases de 7,5 es '+ str(formula) +'\nestas seguro de que quieres pedir carta? Y/y = yes cualquier otra tecla = no: ' ,lJust=59)
+                    if otra.lower() == 'y':
+                        elemento0 = baraja[0]
+                        players[jugador]["roundPoints"] += mazo[elemento0]["value"]
+                        players[jugador]["cards"].append(elemento0)
+                        cadena = 'la nueva carta es '+ players[jugador]["cards"][len(players[jugador]["cards"])-1] +'\nlos puntos totales actuales son ' +  str(players[jugador]["roundPoints"])
+                        print(cadena)
+                        baraja.remove(elemento0)
         elif opcion == "5":
             if players[jugador]["bank"] == True:
                 players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
             else:
-                players = apostarPuntosBot(players,jugador,rasgo,puntos)
+                if apuesta == False:
+                    players = apostarPuntosBot(players,jugador,rasgo,puntos)
                 autoPlayBot(baraja,mazo,rasgo,jugador)
+            input()
+            return players
         elif opcion == "6":
-            return
+            return players
 
 def end(players,ronda):
     winner = players[0]
-    if len(players) == 1:
-        cadena = 'the winer is ' + winner + ' - ' + players[winner] + 'en la ronda '+ ronda + 'con los puntos '+ players[winner]['points']
-        print(cadena)
-        return True
-    else:
-        return False
+    update_game_bbdd()
+    cadena = 'the winer is ' + winner + ' - ' + players[winner] + 'en la ronda '+ ronda + 'con los puntos '+ players[winner]['points']
+    print(cadena)
 
 
 def play():
@@ -942,7 +925,7 @@ def play():
 
         mazo = settings_game["deck"]
         players = settings_game["players"]
-        
+        inserts_game_bbdd()
         for ronda in range(settings_game["n_rouds"]):
             baraja = returnBarajaMezclada(settings_game["deck"])
 
@@ -967,7 +950,7 @@ def play():
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
                             
                         else:
-                            menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
+                            players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad)
                 mesa(listaPrioridad)
                 #uno_en_mesa([jugador],players)
                 input()
@@ -975,9 +958,30 @@ def play():
             players = repartir_puntos(players)
             listaPrioridad = ordenar_prioridad_inGame()
             input()
-            fin = end(players,ronda)
-            if fin == True:
+            if len(players) == 1:
+                end(players,ronda)
                 break
+
+def inserts_game_bbdd():
+    mazo = settings_game["deck"]
+    k_mazo = mazo.keys()
+    add_initial_in_bbdd = conn.cursor()
+    if 'O01' in k_mazo:
+        query_initial_add_game_in_bbdd = f"insert into games(initial_time,n_players,n_round,type_deck) values ((select SYSDATE()),{settings_game['n_players']},{settings_game['n_rouds']},'española')"
+    else:
+        query_initial_add_game_in_bbdd = f"insert into games(initial_time,n_players,n_round,type_deck) values ((select SYSDATE()),{settings_game['n_players']},{settings_game['n_rouds']},'poker')"
+    add_initial_in_bbdd.execute(query_initial_add_game_in_bbdd)
+    conn.commit()
+
+def update_game_bbdd():
+    update_game_in_bbdd = conn.cursor()
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    query_end_game_bbdd = f"update games set end_time = (select sysdate()) where id_game = @id"
+    update_game_in_bbdd.execute(query_end_game_bbdd)
+    conn.commit()
 
 #Ranking functions
 def ranking():
@@ -1006,8 +1010,13 @@ def showPlayersWithMoreEarning():
             for comp in range(len(var)-1-pasadas):
                 if var[comp][2] < var[comp+1][2]:
                     var[comp],var[comp+1] = var[comp+1],var[comp]
-    for i in var:
-        listaOrd = f'{i}'
+    tres_mejores = []
+    ord_print = '='*37+'\n'+'DNI'.ljust(13)+'Profits'.ljust(10)+'Games'.ljust(7)+'Minutes'.rjust(5)+'\n'+'='*37
+    print(ord_print)
+    for i in range(3):
+        tres_mejores.append(var[i])
+    for i in tres_mejores:
+        listaOrd = f'{i[1]}'.ljust(13)+f'{i[2]}'.ljust(10)+f'{i[3]}'.ljust(7)+f'{i[4]}'.rjust(5)
         print(listaOrd)
     input()
     print("PWME")
@@ -1021,9 +1030,15 @@ def showPlayersWithMoreGamesPlayed():
         for comp in range(len(var)-1-pasadas):
             if var[comp][3] < var[comp+1][3]:
                 var[comp],var[comp+1] = var[comp+1],var[comp]
-    for i in var:
-        listaOrd = f'{i}'
+    tres_mejores = []
+    ord_print = '='*37+'\n'+'DNI'.ljust(13)+'Profits'.ljust(10)+'Games'.ljust(7)+'Minutes'.rjust(5)+'\n'+'='*37
+    print(ord_print)
+    for i in range(3):
+        tres_mejores.append(var[i])
+    for i in tres_mejores:
+        listaOrd = f'{i[1]}'.ljust(13)+f'{i[2]}'.ljust(10)+f'{i[3]}'.ljust(7)+f'{i[4]}'.rjust(5)
         print(listaOrd)
+    input()
     print("PWMGP")
 
 def showPlayersWithMoreMinutesPlayed():
@@ -1035,8 +1050,13 @@ def showPlayersWithMoreMinutesPlayed():
             for comp in range(len(var)-1-pasadas):
                 if var[comp][4] < var[comp+1][4]:
                     var[comp],var[comp+1] = var[comp+1],var[comp]
-    for i in var:
-        listaOrd = f'{i}'
+    tres_mejores = []
+    ord_print = '='*37+'\n'+'DNI'.ljust(13)+'Profits'.ljust(10)+'Games'.ljust(7)+'Minutes'.rjust(5)+'\n'+'='*37
+    print(ord_print)
+    for i in range(3):
+        tres_mejores.append(var[i])
+    for i in tres_mejores:
+        listaOrd = f'{i[1]}'.ljust(13)+f'{i[2]}'.ljust(10)+f'{i[3]}'.ljust(7)+f'{i[4]}'.rjust(5)
         print(listaOrd)
     input()
     print("PWMMP")
@@ -1134,103 +1154,3 @@ def rep_prop10():
     print(propuesta10)
     input()
     return
-###############################################################################################################
-#Variables
-
-cartas = {
-    "O01": {"literal": "As de Oros", "value": 1, "priority": 4, "realValue": 1},
-    "O02": {"literal": "Dos de Oros", "value": 2, "priority": 4, "realValue": 2},
-    "O03": {"literal": "Tres de Oros", "value": 3, "priority": 4, "realValue": 3},
-    "O04": {"literal": "Cuatro de Oros", "value": 4, "priority": 4, "realValue": 4},
-    "O05": {"literal": "Cinco de Oros", "value": 5, "priority": 4, "realValue": 5},
-    "O06": {"literal": "Seis de Oros", "value": 6, "priority": 4, "realValue": 6},
-    "O07": {"literal": "Siete de Oros", "value": 7, "priority": 4, "realValue": 7},
-    "O08": {"literal": "Sota de Oros", "value": 8, "priority": 4, "realValue": 0.5},
-    "O09": {"literal": "Caballo de Oros", "value": 9, "priority": 4, "realValue": 0.5},
-    "O10": {"literal": "Rey de Oros", "value": 10, "priority": 4, "realValue": 0.5},
-    "C01": {"literal": "As de Copas", "value": 1, "priority": 3, "realValue": 1},
-    "C02": {"literal": "Dos de Copas", "value": 2, "priority": 3, "realValue": 2},
-    "C03": {"literal": "Tres de Copas", "value": 3, "priority": 3, "realValue": 3},
-    "C04": {"literal": "Cuatro de Copas", "value": 4, "priority": 3, "realValue": 4},
-    "C05": {"literal": "Cinco de Copas", "value": 5, "priority": 3, "realValue": 5},
-    "C06": {"literal": "Seis de Copas", "value": 6, "priority": 3, "realValue": 6},
-    "C07": {"literal": "Siete de Copas", "value": 7, "priority": 3, "realValue": 7},
-    "C08": {"literal": "Sota de Copas", "value": 8, "priority": 3, "realValue": 0.5},
-    "C09": {"literal": "Caballo de Copas", "value": 9, "priority": 3, "realValue": 0.5},
-    "C10": {"literal": "Rey de Copas", "value": 10, "priority": 3, "realValue": 0.5},
-    "E01": {"literal": "As de Espadas", "value": 1, "priority": 2, "realValue": 1},
-    "E02": {"literal": "Dos de Espadas", "value": 2, "priority": 2, "realValue": 2},
-    "E03": {"literal": "Tres de Espadas", "value": 3, "priority": 2, "realValue": 3},
-    "E04": {"literal": "Cuatro de Espadas", "value": 4, "priority": 2, "realValue": 4},
-    "E05": {"literal": "Cinco de Espadas", "value": 5, "priority": 2, "realValue": 5},
-    "E06": {"literal": "Seis de Espadas", "value": 6, "priority": 2, "realValue": 6},
-    "E07": {"literal": "Siete de Espadas", "value": 7, "priority": 2, "realValue": 7},
-    "E08": {"literal": "Sota de Espadas", "value": 8, "priority": 2, "realValue": 0.5},
-    "E09": {"literal": "Caballo de Espadas", "value": 9, "priority": 2, "realValue": 0.5},
-    "E10": {"literal": "Rey de Espadas", "value": 10, "priority": 2, "realValue": 0.5},
-    "B01": {"literal": "As de Bastos", "value": 1, "priority": 1, "realValue": 1},
-    "B02": {"literal": "Dos de Bastos", "value": 2, "priority": 1, "realValue": 2},
-    "B03": {"literal": "Tres de Bastos", "value": 3, "priority": 1, "realValue": 3},
-    "B04": {"literal": "Cuatro de Bastos", "value": 4, "priority": 1, "realValue": 4},
-    "B05": {"literal": "Cinco de Bastos", "value": 5, "priority": 1, "realValue": 5},
-    "B06": {"literal": "Seis de Bastos", "value": 6, "priority": 1, "realValue": 6},
-    "B07": {"literal": "Siete de Bastos", "value": 7, "priority": 1, "realValue": 7},
-    "B08": {"literal": "Sota de Bastos", "value": 8, "priority": 1, "realValue": 0.5},
-    "B09": {"literal": "Caballo de Bastos", "value": 9, "priority": 1, "realValue": 0.5},
-    "B10": {"literal": "Rey de Bastos", "value": 10, "priority": 1, "realValue": 0.5},
-}
-
-cartasP = {
-    "AC": {"literal": "As de Corazones", "value": 1, "priority": 4, "realValue": 1},
-    "2C": {"literal": "Dos de Corazones", "value": 2, "priority": 4, "realValue": 2},
-    "3C": {"literal": "Tres de Corazones", "value": 3, "priority": 4, "realValue": 3},
-    "4C": {"literal": "Cuatro de Corazones", "value": 4, "priority": 4, "realValue": 4},
-    "5C": {"literal": "Cinco de Corazones", "value": 5, "priority": 4, "realValue": 5},
-    "6C": {"literal": "Seis de Corazones", "value": 6, "priority": 4, "realValue": 6},
-    "7C": {"literal": "Siete de Corazones", "value": 7, "priority": 4, "realValue": 7},
-    "8C": {"literal": "Ocho de Corazones", "value": 8, "priority": 4, "realValue": 0.5},
-    "9C": {"literal": "Nueve de Corazones", "value": 9, "priority": 4, "realValue": 0.5},
-    "10C": {"literal": "Diez de Corazones", "value": 10, "priority": 4, "realValue": 0.5},
-    "JC": {"literal": "Jota de Corazones", "value": 11, "priority": 4, "realValue": 0.5},
-    "QC": {"literal": "Reina de Corazones", "value": 12, "priority": 4, "realValue": 0.5},
-    "KC": {"literal": "Rey de Corazones", "value": 13, "priority": 4, "realValue": 0.5},
-    "AD": {"literal": "As de Diamantes", "value": 1, "priority": 3, "realValue": 1},
-    "2D": {"literal": "Dos de Diamantes", "value": 2, "priority": 3, "realValue": 2},
-    "3D": {"literal": "Tres de Diamantes", "value": 3, "priority": 3, "realValue": 3},
-    "4D": {"literal": "Cuatro de Diamantes", "value": 4, "priority": 3, "realValue": 4},
-    "5D": {"literal": "Cinco de Diamantes", "value": 5, "priority": 3, "realValue": 5},
-    "6D": {"literal": "Seis de Diamantes", "value": 6, "priority": 3, "realValue": 6},
-    "7D": {"literal": "Siete de Diamantes", "value": 7, "priority": 3, "realValue": 7},
-    "8D": {"literal": "Ocho de Diamantes", "value": 8, "priority": 3, "realValue": 0.5},
-    "9D": {"literal": "Nueve de Diamantes", "value": 9, "priority": 3, "realValue": 0.5},
-    "10D": {"literal": "Diez de Diamantes", "value": 10, "priority": 3, "realValue": 0.5},
-    "JD": {"literal": "Jota de Diamantes", "value": 11, "priority": 3, "realValue": 0.5},
-    "QD": {"literal": "Reina de Diamantes", "value": 12, "priority": 3, "realValue": 0.5},
-    "KD": {"literal": "Rey de Diamantes", "value": 13, "priority": 3, "realValue": 0.5},
-    "AS": {"literal": "As de Espadas", "value": 1, "priority": 2, "realValue": 1},
-    "2S": {"literal": "Dos de Espadas", "value": 2, "priority": 2, "realValue": 2},
-    "3S": {"literal": "Tres de Espadas", "value": 3, "priority": 2, "realValue": 3},
-    "4S": {"literal": "Cuatro de Espadas", "value": 4, "priority": 2, "realValue": 4},
-    "5S": {"literal": "Cinco de Espadas", "value": 5, "priority": 2, "realValue": 5},
-    "6S": {"literal": "Seis de Espadas", "value": 6, "priority": 2, "realValue": 6},
-    "7S": {"literal": "Siete de Espadas", "value": 7, "priority": 2, "realValue": 7},
-    "8S": {"literal": "Ocho de Espadas", "value": 8, "priority": 2, "realValue": 0.5},
-    "9S": {"literal": "Nueve de Espadas", "value": 9, "priority": 2, "realValue": 0.5},
-    "10S": {"literal": "Diez de Espadas", "value": 10, "priority": 2, "realValue": 0.5},
-    "JS": {"literal": "Jota de Espadas", "value": 11, "priority": 2, "realValue": 0.5},
-    "QS": {"literal": "Reina de Espadas", "value": 12, "priority": 2, "realValue": 0.5},
-    "KS": {"literal": "Rey de Espadas", "value": 13, "priority": 2, "realValue": 0.5},
-    "AH": {"literal": "As de Tréboles", "value": 1, "priority": 1, "realValue": 1},
-    "2H": {"literal": "Dos de Tréboles", "value": 2, "priority": 1, "realValue": 2},
-    "3H": {"literal": "Tres de Tréboles", "value": 3, "priority": 1, "realValue": 3},
-    "4H": {"literal": "Cuatro de Tréboles", "value": 4, "priority": 1, "realValue": 4},
-    "5H": {"literal": "Cinco de Tréboles", "value": 5, "priority": 1, "realValue": 5},
-    "6H": {"literal": "Seis de Tréboles", "value": 6, "priority": 1, "realValue": 6},
-    "7H": {"literal": "Siete de Tréboles", "value": 7, "priority": 1, "realValue": 7},
-    "8H": {"literal": "Ocho de Tréboles", "value": 8, "priority": 1, "realValue": 0.5},
-    "9H": {"literal": "Nueve de Tréboles", "value": 9, "priority": 1, "realValue": 0.5},
-    "10H": {"literal": "Diez de Tréboles", "value": 10, "priority": 1, "realValue": 0.5},
-    "JH": {"literal": "Jota de Tréboles", "value": 11, "priority": 1, "realValue": 0.5},
-    "QH": {"literal": "Reina de Tréboles", "value": 12, "priority": 1, "realValue": 0.5},
-    "KH": {"literal": "Rey de Tréboles", "value": 13, "priority": 1, "realValue": 0.5},
-}
