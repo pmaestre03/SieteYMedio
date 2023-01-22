@@ -171,6 +171,76 @@ def update_game_bbdd():
     query_end_game_bbdd = f"update games set end_time = (select sysdate()) where id_game = @id"
     update_game_in_bbdd.execute(query_end_game_bbdd)
     conn.commit()
+<<<<<<< HEAD
+=======
+
+def update_players_games(player,points):
+    update_players_in_game = conn.cursor()
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    query_update_players_in_game = f"update scores set Profits = Profits+{points}, total_games_played = total_games_played+1, minutes_pleyed = minutes_pleyed+(select (hour(TIMEDIFF(end_time,initial_time))*60+minute(TIMEDIFF(end_time,initial_time))) from games where id_game=@id) where dni='{player}'"
+    update_players_in_game.execute(query_update_players_in_game)
+    conn.commit()
+
+def insert_winners(player,points):
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    insert_player_in_winner = conn.cursor()
+    query_insert_player_in_winner = f"insert into winners(id_game,dni,points) values(@id,'{player}',{points})"
+    insert_player_in_winner.execute(query_insert_player_in_winner)
+    conn.commit()
+
+def insert_round(player,bank,p_begin,round_game):
+    insert_round_bbdd = conn.cursor()
+    query_insert_round_bbdd = f"insert into round(round_game,dni,bank,point_begin,point_end,points_bet) values({round_game},'{player}',{bank},{p_begin},0,0)"
+    insert_round_bbdd.execute(query_insert_round_bbdd)
+    conn.cursor()
+       
+def update_round(p_end,p_bet,player):
+    select_round_bbdd = conn.cursor()
+    query_select_round_bbdd = f"set @id_round := (select max(id_round) from round)"
+    select_round_bbdd.execute(query_select_round_bbdd)
+    conn.commit()
+    select_points_begin = conn.cursor()
+    # select points_begin from round
+    query_select_points_begin = f"set @points := (select point_begin from round where dni='{player}' and id_round=@id_round)"
+    update_round_bbdd = conn.cursor()
+    select_points_begin.execute(query_select_points_begin)
+    conn.cursor()
+    query_update_round_bbdd = f"update round set point_end=@points-{p_bet},points_bet={p_bet} where dni='{player}' and id_round=@id_round"    
+    update_round_bbdd.execute(query_update_round_bbdd)
+    conn.cursor()
+def insert_round_game(round_game):
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id_game := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    select_round_bbdd = conn.cursor()
+    query_select_round_bbdd = f"set @id_round := (select max(id_round) from round)"
+    select_round_bbdd.execute(query_select_round_bbdd)
+    conn.commit()
+    insert_round_game_bbdd = conn.cursor()
+    query_insert_round_game = f"insert into round_games(id_round,id_game) values(@id_round,@id_game)"
+    insert_round_game_bbdd.execute(query_insert_round_game)
+    conn.commit()
+
+def insert_game_player(players):
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    add_players = conn.cursor()
+    for i in players:
+        query_add_players = f"insert into game_player(dni,id_game) values('{i}',@id)"
+        add_players.execute(query_add_players)
+        conn.commit()
+
+    
+>>>>>>> origin/PMaestre
 
 #Players conf functions
 def playersConf():
@@ -226,6 +296,9 @@ def newPlayer(esBot=False):
         cur.execute(query)
         conn.commit()
         input("Jugador creado correctamente\nPulsa enter para continuar")
+    query_scores = f"insert into scores(dni,Profits,total_games_played,minutes_pleyed) select dni,0,0,0 from player where dni='{dni}'"
+    cur.execute(query_scores)
+    conn.commit()
     
 
 
@@ -489,7 +562,11 @@ def setGamePlayers(players_in_game):
                     selecion = False
                     break
                 if option[0] == '-' and option[1:] in players_in_game:
+<<<<<<< HEAD
                     input('El jugador {} se elimino de la partida\nPulsa enter para continuar'.format(option[1:]))
+=======
+                    input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
+>>>>>>> origin/PMaestre
                     players_in_game.remove(option[1:])
                     break
                 elif not checkExistenceDNI(option):
@@ -968,7 +1045,13 @@ def endPorPlayers(players,ronda):
         winnerID = i
         winnerName = players[i]["name"]
         winnerPoints = players[i]["points"]
+<<<<<<< HEAD
     cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda '+ str(ronda) + ', con los puntos '+ str(winnerPoints)
+=======
+        update_players_games(i,players[i]["points"])
+    cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda '+ str(ronda) + ', con los puntos '+ str(winnerPoints)
+    insert_winners(winnerID,winnerPoints)
+>>>>>>> origin/PMaestre
     print(cadena)
 
 def endPorRondas(players):
@@ -978,6 +1061,10 @@ def endPorRondas(players):
     for i in players:
         listaPuntosJugadores.append(players[i]["points"])
         listaJugadores.append(i)
+<<<<<<< HEAD
+=======
+        update_players_games(i,players[i]["points"])
+>>>>>>> origin/PMaestre
 
     for i in range(len(listaPuntosJugadores)):
         for j in range(0, len(listaPuntosJugadores)-i-1):
@@ -998,7 +1085,13 @@ def endPorRondas(players):
         winnerName = players[i]["name"]
         winnerPoints = players[i]["points"]
         cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda maxima' + ', con los puntos '+ str(winnerPoints)
+<<<<<<< HEAD
         print(cadena)
+=======
+        insert_winners(winnerID,winnerPoints)
+        print(cadena)
+    
+>>>>>>> origin/PMaestre
 
 
 def play():
@@ -1011,6 +1104,7 @@ def play():
 
         mazo = settings_game["deck"]
         players = settings_game["players"]
+        insert_game_player(players)
         inserts_game_bbdd()
         for ronda in range(settings_game["n_rouds"]):
             baraja = returnBarajaMezclada(settings_game["deck"])
@@ -1022,21 +1116,25 @@ def play():
 
                         limpiarTerminal()
                         printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
-
+                        
                         rasgo = players[jugador]["type"]
                         roundPoints = players[jugador]["roundPoints"]
                         puntos = players[jugador]["points"]
-
+                        insert_round(player=jugador,bank=players[jugador]["bank"],p_begin=puntos,round_game=ronda)
                         if players[jugador]["human"] == False:
                             if players[jugador]["bank"] == True:
                                 players = autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players)
-
                             else:
                                 players = apostarPuntosBot(players,jugador,rasgo,puntos)
                                 autoPlayBot(baraja,mazo,rasgo,jugador)
                             
                         else:
                             players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad,ronda)
+<<<<<<< HEAD
+=======
+                        update_round(player=jugador,p_end=players[jugador]["roundPoints"],p_bet=players[jugador]["bet"])
+                insert_round_game(ronda)
+>>>>>>> origin/PMaestre
                 mesa(listaPrioridad,ronda,jugador)
                 input()
 
@@ -1046,6 +1144,7 @@ def play():
             if len(players) == 1:
                 endPorPlayers(players,ronda)
                 input("\nPulsa enter para continuar")
+<<<<<<< HEAD
 
                 settings_game["n_players"] = 0
                 players_in_game = []
@@ -1057,6 +1156,14 @@ def play():
         #!!!!!!!!!!!!!!!!!resetear todo a 0
         settings_game["n_players"] = 0
         players_in_game = []
+=======
+                return
+        
+        endPorRondas(players)
+        input("\nPulsa enter para continuar")
+
+        #!!!!!!!!!!!!!!!!!resetear todo a 0
+>>>>>>> origin/PMaestre
         return
 
 #Ranking functions
