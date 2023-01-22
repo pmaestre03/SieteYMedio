@@ -171,8 +171,6 @@ def update_game_bbdd():
     query_end_game_bbdd = f"update games set end_time = (select sysdate()) where id_game = @id"
     update_game_in_bbdd.execute(query_end_game_bbdd)
     conn.commit()
-<<<<<<< HEAD
-=======
 
 def update_players_games(player,points):
     update_players_in_game = conn.cursor()
@@ -240,7 +238,6 @@ def insert_game_player(players):
         conn.commit()
 
     
->>>>>>> origin/PMaestre
 
 #Players conf functions
 def playersConf():
@@ -562,11 +559,7 @@ def setGamePlayers(players_in_game):
                     selecion = False
                     break
                 if option[0] == '-' and option[1:] in players_in_game:
-<<<<<<< HEAD
                     input('El jugador {} se elimino de la partida\nPulsa enter para continuar'.format(option[1:]))
-=======
-                    input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
->>>>>>> origin/PMaestre
                     players_in_game.remove(option[1:])
                     break
                 elif not checkExistenceDNI(option):
@@ -1045,13 +1038,9 @@ def endPorPlayers(players,ronda):
         winnerID = i
         winnerName = players[i]["name"]
         winnerPoints = players[i]["points"]
-<<<<<<< HEAD
-    cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda '+ str(ronda) + ', con los puntos '+ str(winnerPoints)
-=======
         update_players_games(i,players[i]["points"])
     cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda '+ str(ronda) + ', con los puntos '+ str(winnerPoints)
     insert_winners(winnerID,winnerPoints)
->>>>>>> origin/PMaestre
     print(cadena)
 
 def endPorRondas(players):
@@ -1061,10 +1050,7 @@ def endPorRondas(players):
     for i in players:
         listaPuntosJugadores.append(players[i]["points"])
         listaJugadores.append(i)
-<<<<<<< HEAD
-=======
         update_players_games(i,players[i]["points"])
->>>>>>> origin/PMaestre
 
     for i in range(len(listaPuntosJugadores)):
         for j in range(0, len(listaPuntosJugadores)-i-1):
@@ -1085,13 +1071,9 @@ def endPorRondas(players):
         winnerName = players[i]["name"]
         winnerPoints = players[i]["points"]
         cadena = 'El ganador es:  ' + winnerID + ' - ' + winnerName + ', en la ronda maxima' + ', con los puntos '+ str(winnerPoints)
-<<<<<<< HEAD
-        print(cadena)
-=======
         insert_winners(winnerID,winnerPoints)
         print(cadena)
     
->>>>>>> origin/PMaestre
 
 
 def play():
@@ -1130,21 +1112,17 @@ def play():
                             
                         else:
                             players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad,ronda)
-<<<<<<< HEAD
-=======
                         update_round(player=jugador,p_end=players[jugador]["roundPoints"],p_bet=players[jugador]["bet"])
                 insert_round_game(ronda)
->>>>>>> origin/PMaestre
                 mesa(listaPrioridad,ronda,jugador)
                 input()
 
-        #no te olvides de resetear el diccionario
+
             players = repartir_puntos(players)
             listaPrioridad = ordenar_prioridad_inGame()
             if len(players) == 1:
                 endPorPlayers(players,ronda)
                 input("\nPulsa enter para continuar")
-<<<<<<< HEAD
 
                 settings_game["n_players"] = 0
                 players_in_game = []
@@ -1153,17 +1131,9 @@ def play():
         endPorRondas(players)
         input("\nPulsa enter para continuar")
 
-        #!!!!!!!!!!!!!!!!!resetear todo a 0
+
         settings_game["n_players"] = 0
         players_in_game = []
-=======
-                return
-        
-        endPorRondas(players)
-        input("\nPulsa enter para continuar")
-
-        #!!!!!!!!!!!!!!!!!resetear todo a 0
->>>>>>> origin/PMaestre
         return
 
 #Ranking functions
