@@ -1,6 +1,3 @@
-
-
-
 from random import *
 import pymysql
 from variables import *
@@ -9,6 +6,7 @@ conn = pymysql.connect(host="51.145.227.94", user="prius", password="P@ssw0rd", 
 cur = conn.cursor()
 
 settings_game = {'n_players':0}
+players_in_game = []
 
 #Recibe una lista y un bool y crea un menu en base a la lista
 def crearMenu(lista,separador,empezarEnCero = True,lJust = 0):
@@ -319,7 +317,7 @@ def settings():
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,4))
 
         if opcion == "1":
-            players = setGamePlayers()
+            players = setGamePlayers(players_in_game)
             settings_game["n_players"] = len(players)
             settings_game["players"] = players
         elif opcion == "2":
@@ -365,7 +363,6 @@ def mostrarPlayers_settings(players_in_game_list=[]):
                     cadena1 += l_b[0][0].ljust(19) + " " + l_b[0][1].ljust(24) + " " + reisgoEnTexto(l_b[0][2]).ljust(24) + "||".ljust(1)
                     break
                 else:
-                    #cadena1 += "".ljust(69) + "||".ljust(1)
                     try:
                         if len(l_b) > 1:
                             l_b = l_b[1:]
@@ -470,11 +467,10 @@ def lis_dic(players_in_game):
                     dict_players[i]={"name":j[1],"human":False,"bank":False,"initialCard":"","priority":0 ,"type":j[2],"bet":0,"points":20,"cards":[],"roundPoints":0}
     return dict_players
 
-def setGamePlayers():
+def setGamePlayers(players_in_game):
         selecion = True
         limpiarTerminal()
 
-        players_in_game=[]
         player_in_game(players_in_game)
         
         
@@ -493,7 +489,7 @@ def setGamePlayers():
                     selecion = False
                     break
                 if option[0] == '-' and option[1:] in players_in_game:
-                    input('the player {} is erased of the game\npress any botton to continue'.format(option[1:]))
+                    input('El jugador {} se elimino de la partida\nPulsa enter para continuar'.format(option[1:]))
                     players_in_game.remove(option[1:])
                     break
                 elif not checkExistenceDNI(option):
@@ -712,7 +708,7 @@ def autoPlayBot(baraja,mazo,rasgo,jugador):
         if turnoBot(baraja,mazo,roundPoints,rasgo):
             elemento0 = baraja[0]
 
-            settings_game["players"][jugador]["roundPoints"] += cartasES[elemento0]["value"]
+            settings_game["players"][jugador]["roundPoints"] += mazo[elemento0]["value"]
 
             settings_game["players"][jugador]["cards"].append(elemento0)
 
@@ -723,19 +719,19 @@ def autoPlayBot(baraja,mazo,rasgo,jugador):
 def listarPuntosJugadores(dicPlayers):
     listaPuntosJugadores = []
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] <= 7.5:
             listaPuntosJugadores.append(dicPlayers[i]["roundPoints"])
     return listaPuntosJugadores
 def listarApuestasJugadores(dicPlayers):
     listaApuestaJugadores = []
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] <= 7.5:
             listaApuestaJugadores.append(dicPlayers[i]["bet"])
     return listaApuestaJugadores
 def sumarApuestasJugadores(dicPlayers):
     sumaApuestaJugadores = 0
     for i in dicPlayers:
-        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] < 7.5:
+        if not dicPlayers[i]["bank"] and dicPlayers[i]["roundPoints"] <= 7.5:
             sumaApuestaJugadores += dicPlayers[i]["bet"]
     return sumaApuestaJugadores
 
@@ -901,7 +897,7 @@ def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPr
             printSevenAndHalfTitle(f"Ronda {ronda}, Turno de {settings_game['players'][jugador]['name']}")
         elif opcion == "3":
             if apuesta == True:
-                input('no es posible cambiar la apuesta\nenter para continuar\n')
+                input('No es posible cambiar la apuesta\nenter para continuar\n')
             else:
                 bet  = comprobarInput("Apuesta: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,players[jugador]['points']))
                 bet = int(bet)
@@ -1009,7 +1005,7 @@ def play():
     if settings_game["n_players"] < 2:
         input("Debes al menos 2 jugadores en la partida para poder empezar\nPulsa enter para continuar")
     else:
-        
+        global players_in_game
         generarPrioridad()
         listaPrioridad = ordenar_prioridad()
 
@@ -1050,12 +1046,17 @@ def play():
             if len(players) == 1:
                 endPorPlayers(players,ronda)
                 input("\nPulsa enter para continuar")
+
+                settings_game["n_players"] = 0
+                players_in_game = []
                 return
         
         endPorRondas(players)
         input("\nPulsa enter para continuar")
 
         #!!!!!!!!!!!!!!!!!resetear todo a 0
+        settings_game["n_players"] = 0
+        players_in_game = []
         return
 
 #Ranking functions
