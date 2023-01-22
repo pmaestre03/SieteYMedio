@@ -297,9 +297,6 @@ def newPlayer(esBot=False):
     cur.execute(query_scores)
     conn.commit()
     
-
-
-
 def comp_dni(textoInput):
     lista = ['T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E']
     try:
@@ -355,6 +352,14 @@ def showPlayersAndRemove():
         entrada = input(" "*46+"> ")
         
         if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
+            query = f"delete from game_player where dni = '{entrada[1:]}'"
+            cur.execute(query)
+            conn.commit()
+
+            query = f"delete from scores where dni = '{entrada[1:]}'"
+            cur.execute(query)
+            conn.commit()
+
             query = f"delete from player where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
@@ -362,7 +367,6 @@ def showPlayersAndRemove():
             break
         else:
             input("Pon un ID valido y en formato correcto\nPulsa enter para continuar")
-
     
 #Settings functions
 def settings():
