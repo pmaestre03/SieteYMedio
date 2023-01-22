@@ -237,7 +237,16 @@ def insert_game_player(players):
         add_players.execute(query_add_players)
         conn.commit()
 
-    
+def insert_cards_round(dni,round_id,list_Card):
+    select_game_bbdd = conn.cursor()
+    query_select_game_bbdd = f"set @id := (select max(id_game) from games)"
+    select_game_bbdd.execute(query_select_game_bbdd)
+    conn.commit()
+    add_Card_round = conn.cursor()
+    for id_card in list_Card:
+        query_cards_round = f"insert into cards_round(dni,id_card,id_round,id_game,n_card_round,decks_suits) values('{dni}','{id_card}','{round_id}',@id,{len(list_Card)},(select deck_suits from cards where id_card='{id_card}'))"
+        add_Card_round.execute(query_cards_round)
+        conn.commit()
 
 #Players conf functions
 def playersConf():
@@ -773,11 +782,11 @@ def apostarPuntosBot(players,player,rasgo,puntos):
                 if apuesta > players[i]["points"]:
                     apuesta = players[i]["points"]
 
-            if apuesta > players[player]["points"]:
-                apuesta = players[player]["points"]
-            if apuesta == 0:
-                apuesta = players[player]["points"]
-            players[player]["bet"] = int(apuesta)
+        if apuesta >= players[player]["points"]:
+            apuesta = players[player]["points"]
+        if players[player]["points"] == 1 or players[player]["points"] == 2 or players[player]["points"] == 3:
+            apuesta = players[player]["points"]
+        players[player]["bet"] = int(apuesta)
             
     return players
 
@@ -905,7 +914,7 @@ def repartir_puntos(players):
                     lista[j] = lista[j + 1]
                     lista[j + 1] = numero
         for i in players:
-            if players[i]['priority'] == lista[0]:
+            if players[i]['priority'] == lista[0] and bank[1] != 7.5:
                 players[i]['bank'] = True
                 players[bank[0]]['bank'] = False
     else:
@@ -913,7 +922,7 @@ def repartir_puntos(players):
             if players[i]['roundPoints'] == 7.5 and players[i]["bank"] == False:
                 siete_medio.append(i)
         if len(siete_medio) >= 1:
-            if len(siete_medio) == 1:
+            if len(siete_medio) == 1 and bank[1] != 7.5:
                 players[siete_medio[0]]['bank'] = True
                 players[bank[0]]['bank'] = False
             else:
@@ -927,7 +936,7 @@ def repartir_puntos(players):
                             lista[j] = lista[j + 1]
                             lista[j + 1] = numero
                 for i in players:
-                    if players[i]['priority'] == lista[0]:
+                    if players[i]['priority'] == lista[0] and bank[1] != 7.5:
                         players[i]['bank'] = True
                         players[bank[0]]['bank'] = False
     for i in players:
@@ -1124,6 +1133,7 @@ def play():
                         else:
                             players = menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad,ronda)
                         update_round(player=jugador,p_end=players[jugador]["roundPoints"],p_bet=players[jugador]["bet"])
+                    #insert_cards_round(jugador,ronda,players[jugador]['cards'])
                 insert_round_game(ronda)
                 mesa(listaPrioridad,ronda,jugador)
                 input()
@@ -1246,7 +1256,7 @@ def rep_prop2():
 
 def rep_prop3():
     prop3 = conn.cursor()
-    queryprop3 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select min(r.points_bet)from round);"
+    queryprop3 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select min(r.points_bet)from round) order by points_bet asc;"
     prop3.execute(queryprop3)
     propuesta3 = list(prop3.fetchall())
     print(propuesta3)
