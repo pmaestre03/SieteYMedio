@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Documentacion Programación</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>Documentacion Programación </h1>
+      <img class="imgmenu" src="images/blackjack.png" alt="" width="75px" height="75px">
+      <nav>
+        <a href="index.html">Index</a>
+        <a href="tutorial.html">Tutorial</a>
+        <a href="equip.html">Equipo</a>
+        <a href="documentacion_programacion.html">Documentacion Programación</a>
+      </nav>
+    </header>
+    <div class="container">
+        <section id="intro">
+            <p>Aqui explicaremos las cosas tecnicas del programa</p>
+        </section>
+        <section id="reglas">
+            <h2>Logica del juego de la banca</h2>
+            <ul>
+                <li>La función "autoPlayBanca" es la función principal que controla el bucle en el que se basa la decisión de la banca de pedir o no pedir otra carta. 
+                    Cada vez que se llama a esta función, se utiliza la función "decisionBancaPedir" para determinar si la banca debe pedir otra carta.</li>
+                <li>Esta función toma varios argumentos como entrada, incluyendo los puntos de la ronda de la banca, los puntos de los jugadores, las apuestas de los jugadores y 
+                    el rasgo de la banca. Utiliza esta información para determinar si la banca debe pedir otra carta o no. </li>
+                <li>Si la banca debe pedir otra carta, se utiliza la función "pedirSegunRasgo" para determinar si la banca debe pedir otra carta basada en el rasgo especificado. 
+                    Esta función toma el número de cartas en la baraja que hacen que la banca supere los 7.5 puntos y utiliza esa información para calcular un porcentaje de 
+                    cartas que no pueden ser pedidas. </li>
+                <li>Si el porcentaje es mayor que el rasgo especificado, la función devuelve False, lo que significa que la banca no debe pedir otra carta. Si el porcentaje es menor, 
+                    la función devuelve True, lo que significa que la banca debe pedir otra carta. </li>
+                <li>En resumen, estas tres funciones trabajan juntas para tomar decisiones sobre si la banca debe pedir otra carta en un juego de cartas, 
+                    utilizando información sobre los puntos de la ronda de la banca.</li>
+
+            </ul>
+            <h2>Lógica del juego de un boot</h2>
+            <ul>
+                <li>La función "autoPlayBot" es la función principal que controla el bucle en el que se basa la decisión del bot de pedir o no pedir otra carta. Cada vez que se 
+                    llama a esta función, se utiliza la función "turnoBot" para determinar si el bot debe pedir otra carta. 
+                    Esta función toma varios argumentos como entrada, incluyendo los puntos de la ronda del bot, las cartas en baraja, el mazo y el rasgo del bot. </li>
+                <li>Utiliza esta información para determinar si el bot debe pedir otra carta o no. Si el bot debe pedir otra carta, se utiliza la función "pedirSegunRasgo" para 
+                    determinar si el bot debe pedir otra carta basada en el rasgo especificado. Esta función toma el número de cartas en la 
+                    baraja que hacen que el bot supere los 7.5 puntos y utiliza esa información para calcular un porcentaje de cartas que no pueden ser pedidas.</li>
+                <li>Si el porcentaje es mayor que el rasgo especificado, la función devuelve False, lo que significa que el bot no debe pedir otra carta. Si el porcentaje es menor, 
+                    la función devuelve True, lo que significa que el bot debe pedir otra carta. En resumen, estas tres funciones trabajan juntas para tomar decisiones sobre si el 
+                    bot debe pedir otra carta en un juego de cartas, 
+                    utilizando información sobre los puntos de la ronda del bot, las cartas en baraja, el mazo y el rasgo del bot. </li>
+            </ul>
+            <h2>Establecimiento de la prioridad inicial de los jugadores.</h2>
+            <ul>
+                <li>La función "generarPrioridad" es la función principal que se encarga de generar la prioridad de los jugadores. Se comienza asignando una carta inicial a cada jugador de forma aleatoria del mazo mezclado, 
+                    luego se utiliza la función "burbujaPrioridad" para ordenar las cartas iniciales de los jugadores de acuerdo a su valor real y prioridad. </li>
+                <li>La función "burbujaPrioridad" utiliza un algoritmo de ordenamiento llamado "burbuja" para ordenar las cartas iniciales de los jugadores. El algoritmo compara cada par 
+                    de cartas adyacentes y las intercambia si están en el orden incorrecto.</li>
+                <li>Este proceso se repite hasta que todas las cartas estén ordenadas. Una vez finalizado el proceso de ordenamiento, 
+                    se asigna una prioridad a cada jugador basada en la posición de su carta inicial en la lista ordenada.</li>
+            </ul>
+            <h2>Inserción en BBDD de las tablas</h2>
+            <ul>
+                <li>Card_Game tiene como objetivo almacenar las cartas que se han usado en cada ronda como el jugador que la ha sacado como su valor en juego</li>
+                <li>Round, en esta tabla almacenamos toda la información que tiene que ver con la ronda actual del jugador, por ejemplo si es la banca o no, los puntos con los que 
+                    empieza y acaba y los que apuesta
+                </li>
+                <li>Round_Games se utiliza para unir la tabla de games con la de rounds y players para conseguir sacar datos como los minutos que se han jugado y poder sumarlos 
+                    a la tabla scores
+                </li>
+            </ul>
+        </section>
+    </div>
+    <footer >
+        <p>Proyecto AWMS1</p>
+        <img src="images/esteve.png" alt="" width="50px" height="50px">
+        <p>IES Esteve Terradas</p>
+    </footer>
+  </body>
+</html>
