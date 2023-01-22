@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE barajas [
+<!ELEMENT barajas (baraja+)>
+<!ELEMENT baraja (palos)>
+<!ELEMENT palos (palo+)>
+<!ELEMENT palo (carta+)>
+<!ATTLIST palo nombre CDATA #REQUIRED>
+<!ELEMENT carta EMPTY>
+<!ATTLIST carta valor CDATA #REQUIRED>
+<!ATTLIST carta nombre CDATA #REQUIRED>
+<!ATTLIST baraja tipo CDATA #REQUIRED>
+]>
+
+<barajas>
+  <baraja tipo ='Española'>
+    <palos>
+      <palo nombre="oros">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="diez"></carta>
+        <carta valor="12" nombre="caballo"></carta>
+        <carta valor="13" nombre="rey"></carta>
+      </palo>
+      <palo nombre="copas">
+      <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="diez"></carta>
+        <carta valor="12" nombre="caballo"></carta>
+        <carta valor="13" nombre="rey"></carta>
+      </palo>
+      <palo nombre="espadas">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="diez"></carta>
+        <carta valor="12" nombre="caballo"></carta>
+        <carta valor="13" nombre="rey"></carta>
+      </palo>
+      <palo nombre="bastos">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="diez"></carta>
+        <carta valor="12" nombre="caballo"></carta>
+        <carta valor="13" nombre="rey"></carta>
+      </palo>
+    </palos>
+  </baraja>
+  <baraja tipo ='Poker'>
+    <palos>
+      <palo nombre="picas">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="J"></carta>
+        <carta valor="12" nombre="Q"></carta>
+        <carta valor="13" nombre="k"></carta>
+      </palo>
+      <palo nombre="diamantes">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="J"></carta>
+        <carta valor="12" nombre="Q"></carta>
+        <carta valor="13" nombre="k"></carta>
+      </palo>
+      <palo nombre="corazones">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="J"></carta>
+        <carta valor="12" nombre="Q"></carta>
+        <carta valor="13" nombre="k"></carta>
+      </palo>
+      <palo nombre="treboles">
+        <carta valor="1" nombre="as"></carta>
+        <carta valor="2" nombre="dos"></carta>
+        <carta valor="3" nombre="tres"></carta>
+        <carta valor="4" nombre="cuatro"></carta>
+        <carta valor="5" nombre="cinco"></carta>
+        <carta valor="6" nombre="seis"></carta>
+        <carta valor="7" nombre="siete"></carta>
+        <carta valor="8" nombre="ocho"></carta>
+        <carta valor="9" nombre="nueve"></carta>
+        <carta valor="10" nombre="J"></carta>
+        <carta valor="12" nombre="Q"></carta>
+        <carta valor="13" nombre="k"></carta>
+      </palo>
+    </palos>
+  </baraja>
+</barajas>
