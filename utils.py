@@ -239,8 +239,6 @@ def insert_game_player(players):
         add_players.execute(query_add_players)
         conn.commit()
 
-    
-
 #Players conf functions
 def playersConf():
     while True:
