@@ -197,7 +197,7 @@ def insert_round(player,bank,p_begin,round_game):
     query_insert_round_bbdd = f"insert into round(round_game,dni,bank,point_begin,point_end,points_bet) values({round_game},'{player}',{bank},{p_begin},0,0)"
     insert_round_bbdd.execute(query_insert_round_bbdd)
     conn.cursor()
-       
+
 def update_round(p_end,p_bet,player):
     select_round_bbdd = conn.cursor()
     query_select_round_bbdd = f"set @id_round := (select max(id_round) from round)"
@@ -350,8 +350,9 @@ def showPlayersAndRemove():
         mostrarPlayers()
         print("-ID para eliminar jugador | 0 para volver atras".center(140))
         entrada = input(" "*46+"> ")
-        
-        if entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
+        if entrada.isspace():
+            input("Pon un ID valido y en formato correcto\nPulsa enter para continuar")
+        elif entrada[0] == "-" and not checkExistenceDNI(entrada[1:]):
             query = f"delete from game_player where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
@@ -359,10 +360,15 @@ def showPlayersAndRemove():
             query = f"delete from scores where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
+            
+            query = f"delete from winners where dni = '{entrada[1:]}'"
+            cur.execute(query)
+            conn.commit()
 
             query = f"delete from player where dni = '{entrada[1:]}'"
             cur.execute(query)
             conn.commit()
+
         elif entrada == "0":
             break
         else:
@@ -653,8 +659,6 @@ def generarPrioridad():
         if players[jugadorActual]["priority"] == len(cartasIniciales):
             players[jugadorActual]["bank"] = True
 
-#settings_game = {'n_players':len(players),'players':players,'n_rounds':rondas,'deck':cartas}
-
 def ordenar_prioridad():
     lista = []
     for i in settings_game["players"]:
@@ -770,6 +774,8 @@ def apostarPuntosBot(players,player,rasgo,puntos):
                     apuesta = players[i]["points"]
 
             if apuesta > players[player]["points"]:
+                apuesta = players[player]["points"]
+            if apuesta == 0:
                 apuesta = players[player]["points"]
             players[player]["bet"] = int(apuesta)
             
@@ -955,6 +961,8 @@ def autoPlayBanca(baraja,mazo,rasgo,jugador,roundPoints,puntos,players):
 def menuJuegoHumano(baraja,mazo,rasgo,jugador,roundPoints,puntos,players,listaPrioridad,ronda):
     apuesta = False
     while True:
+        if roundPoints >= 7.5:
+            return players
         crearMenu(["Estadisticas","Estadisticas Partida","Hacer Apuesta","Pedir Carta","Jugar Automatico","Plantarse"],") ",empezarEnCero=False,lJust=59)
 
         opcion = comprobarInput("Opcion: ",lJust=59,soloText=False,soloNum=True,tuplaRangoNumeros=(1,6))
@@ -1069,7 +1077,6 @@ def endPorRondas(players):
         if listaPuntosJugadores[i] == maximoPuntos:
             listaGanadores.append(listaJugadores[i])
 
-    print(listaGanadores)
     for i in listaGanadores:
         winnerID = i
         winnerName = players[i]["name"]
@@ -1090,8 +1097,8 @@ def play():
 
         mazo = settings_game["deck"]
         players = settings_game["players"]
-        insert_game_player(players)
         inserts_game_bbdd()
+        insert_game_player(players)
         for ronda in range(settings_game["n_rouds"]):
             baraja = returnBarajaMezclada(settings_game["deck"])
 
@@ -1220,11 +1227,20 @@ def showPlayersWithMoreMinutesPlayed():
 
 #Reports Functions
 def rep_prop2():
+    cant = conn.cursor()
     prop2 = conn.cursor()
-    queryprop2 = f"select g.id_game,gp.dni,r.points_bet from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select max(r.points_bet) from round)"
+    query_cantidad = f"select max(id_game) from games"
+    cant.execute(query_cantidad)
+    conn.commit()
+    max_limit = cant.fetchone()
+    print(max_limit[0])
+    queryprop2 = f"select g.id_game,gp.dni,r.points_bet,r.round_game from games g inner join game_player gp on g.id_game = gp.id_game inner join round r on gp.dni = r.dni where r.points_bet = (select max(r.points_bet) from round) order by points_bet desc limit {max_limit[0]}"
     prop2.execute(queryprop2)
-    propuesta2 = list(prop2.fetchall())
-    print(propuesta2)
+    propuesta2 = prop2.fetchall()
+    print("="*80+"\n"+"Apuesta media de la última ronda de cada juego".center(80)+"\n"+"="*80)
+    print("\n"+"ID Game".ljust(10)+"DNI".ljust(10)+"Apuesta".ljust(9)+"Ronda\n"+"*"*34)
+    for i in propuesta2:
+        print(str(i[0]).ljust(10)+str(i[1]).ljust(10)+str(i[2]).rjust(6)+str(i[3]).rjust(8))
     input()
     return
 
@@ -1239,10 +1255,13 @@ def rep_prop3():
 
 def rep_prop5():
     prop5 = conn.cursor()
-    queryprop5 = f"select w.id_game,w.points from winners w inner join player p on w.dni = p.dni where p.human = 0;"
+    queryprop5 = f"select w.id_game,w.points,w.dni from winners w inner join player p on w.dni = p.dni where p.human = 0;"
     prop5.execute(queryprop5)
-    propuesta5 = list(prop5.fetchall())
-    print(propuesta5)
+    propuesta5 = prop5.fetchall()
+    print("="*80+"\n"+"Lista de juegos ganados por Bots".center(80)+"\n"+"="*80)
+    print("\n"+"Id Game".ljust(10)+"Points".ljust(10)+"DNI\n"+"*"*29)
+    for i in propuesta5:
+        print(str(i[0]).ljust(10)+str(i[1]).ljust(10)+str(i[2]))
     input()
     return
 
@@ -1251,7 +1270,10 @@ def rep_prop7():
     queryprop7 = f"select g.id_game,count(distinct dni) as banca from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where r.bank = 1 group by g.id_game;"
     prop7.execute(queryprop7)
     propuesta7 = list(prop7.fetchall())
-    print(propuesta7)
+    print("="*80+"\n"+"Número de usuarios han sido el banco en cada juego".center(80)+"\n"+"="*80)
+    print("\n"+"ID Juego".ljust(15)+"Nº Jugadores Siendo Banca\n"+"*"*40)
+    for i in propuesta7:
+        print(str(i[0]).ljust(15) + str(i[1])[0:3])
     input()
     return
 
@@ -1260,36 +1282,45 @@ def rep_prop8():
     queryprop8 = f"select g.id_game,avg(r.points_bet) as media_puntos_partida from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round group by rg.id_game;"
     prop8.execute(queryprop8)
     propuesta8 = list(prop8.fetchall())
-    print(propuesta8)
+    print("="*80+"\n"+"Apuesta media por juego".center(80)+"\n"+"="*80)
+    print("\n"+"ID Juego".ljust(15)+"Apuesta Media\n"+"*"*28)
+    for i in propuesta8:
+        print(str(i[0]).ljust(15) + str(i[1])[0:3])
     input()
     return
 
 def rep_prop9():
     prop9 = conn.cursor()
-    queryprop9 = f"select g.id_game,avg(r.points_bet) as media from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where rg.id_round = 1 group by rg.id_round_games;"
+    queryprop9 = f"select g.id_game,avg(r.points_bet) as media from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where r.round_game = 0 group by rg.id_game"
     prop9.execute(queryprop9)
     propuesta9 = list(prop9.fetchall())
-    print(propuesta9)
+    print("="*80+"\n"+"Apuesta media de la primera ronda de cada juego".center(80)+"\n"+"="*80)
+    print("\n"+"ID Juego".ljust(15)+"Apuesta Media\n"+"*"*28)
+    for i in propuesta9:
+        print(str(i[0]).ljust(15) + str(i[1])[0:3])
     input()
     return
 
 def rep_prop10():
     prop10 = conn.cursor()
-    queryprop10 = f"select g.id_game,avg(r.points_bet) as media_ultima_ronda from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where rg.id_round = (select max(rg.id_round) from round_games) group by rg.id_round_games;"
+    queryprop10 = f"select g.id_game,avg(r.points_bet) as media_ultima_ronda from games g inner join round_games rg on g.id_game = rg.id_game inner join round r on rg.id_round = r.id_round where r.round_game = (select max(r.round_game) from round_games) group by rg.id_game;"
     prop10.execute(queryprop10)
     propuesta10 = list(prop10.fetchall())
-    print(propuesta10)
+    print("="*80+"\n"+"Apuesta media de la última ronda de cada juego".center(80)+"\n"+"="*80)
+    print("\n"+"ID Juego".ljust(15)+"Apuesta Media\n"+"*"*28)
+    for i in propuesta10:
+        print(str(i[0]).ljust(15) + str(i[1])[0:3])
     input()
     return
 
 def reports():
-    limpiarTerminal()
     while True:
+        limpiarTerminal()
         printSevenAndHalfTitle(" Reportes ")
-        crearMenu(["Initial card more repeated by each user, only users who have played a minimum of 3 games.","Player who makes the highest bet per game, find the round with the highest bet."
-        ,"Player who makes the lowest bet per game.","Percentage of rounds won per player in each game (%), as well as their average bet for the game.",
-        "List of games won by Bots.","Rounds won by the bank in each game.","Number of users have been the bank in each game.","Average bet per game.",
-        "Average bet of the first round of each game.","Average bet of the last round of each game.","Go back"],") ",empezarEnCero=False)
+        crearMenu(["Carta inicial más repetida por cada usuario, solo usuarios que hayan jugado un mínimo de 3 partidas.","Jugador que hace la apuesta más alta por juego, encuentra la ronda con la apuesta más alta."
+        ,"Jugador que hace la apuesta más baja por juego.","Porcentaje de rondas ganadas por jugador en cada juego (%), así como su apuesta promedio para el juego.",
+        "Lista de juegos ganados por Bots.","Rondas ganadas por el banco en cada juego.","Número de usuarios han sido el banco en cada juego.","Apuesta media por juego.",
+        "Apuesta media de la primera ronda de cada juego.","Apuesta media de la última ronda de cada juego.","Atras"],") ",empezarEnCero=False)
 
         opcion = comprobarInput("> ",soloText=False,soloNum=True,tuplaRangoNumeros=(1,11))
         if opcion == "1" or opcion == "4" or opcion == "6":
