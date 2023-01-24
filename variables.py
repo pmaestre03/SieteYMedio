@@ -73,6 +73,7 @@ cartasPoker = {
     "QD": {"literal": "Reina de Diamantes", "value": 0.5, "priority": 3, "realValue": 12},
     "KD": {"literal": "Rey de Diamantes", "value": 0.5, "priority": 3, "realValue": 13},
 
+    
     "AP": {"literal": "As de Picas", "value": 1, "priority": 2, "realValue": 1},
     "2P": {"literal": "Dos de Picas", "value": 2, "priority": 2, "realValue": 2},
     "3P": {"literal": "Tres de Picas", "value": 3, "priority": 2, "realValue": 3},
