@@ -1,17 +1,6 @@
 from utils import *
 from random import *
 
-#Ejemplo de uso de pymysql
-'''
-import pymysql
-conn=pymysql.connect(host="51.145.227.94",user="prius",password="P@ssw0rd",db="proyecto")
-cur = conn.cursor()
-
-query = f"select * from aventura"
-cur.execute(query)
-variable = cur.fetchall()
-'''
-
 while True:
     limpiarTerminal()
     printSevenAndHalfTitle("")
